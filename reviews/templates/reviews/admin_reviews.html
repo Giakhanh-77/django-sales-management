@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Quản lý đánh giá{% endblock %}
+
+{% block dashboard_content %}
+<div class="card">
+    <div class="card-header">⭐ Tất cả đánh giá khách hàng</div>
+
+    <div class="card-body table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Khách hàng</th>
+                    <th>Sản phẩm</th>
+                    <th>Sao</th>
+                    <th>Nội dung</th>
+                    <th>Ngày</th>
+                </tr>
+            </thead>
+            <tbody id="allReviewsBody">
+                <tr>
+                    <td colspan="5" class="text-center text-muted">
+                        Đang tải...
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+fetch('/reviews/api/admin/all/')
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById('allReviewsBody').innerHTML = data.length
+            ? data.map(r => `
+                <tr>
+                    <td>${r.khach_hang}</td>
+                    <td>${r.san_pham}</td>
+                    <td>${r.so_sao} ⭐</td>
+                    <td>${r.noi_dung}</td>
+                    <td>${new Date(r.ngay_tao).toLocaleDateString('vi-VN')}</td>
+                </tr>
+            `).join('')
+            : `<tr><td colspan="5" class="text-center">Không có đánh giá</td></tr>`;
+    });
+</script>
+{% endblock %}

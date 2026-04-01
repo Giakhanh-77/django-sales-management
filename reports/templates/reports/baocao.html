@@ -1,0 +1,647 @@
+{% extends "base.html" %}
+{% block dashboard_content %}
+
+<head>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+</head>
+<style>
+
+.reports-wrap {
+    width: 100%;
+}
+
+/* ==============================
+   BASE – DESKTOP
+   ============================== */
+h2 {
+    font-size: 1.5rem;
+}
+
+.card-header strong {
+    font-size: 0.95rem;
+}
+
+.btn {
+    font-size: 0.9rem;
+}
+
+.table th,
+.table td {
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.chart-box {
+    flex: 1;
+    position: relative;
+    min-height: 0;
+}
+
+#topProductsChart {
+    height: 550px;
+}
+
+.report-card .card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* ==============================
+   TABLET
+   ============================== */
+@media (max-width: 992px) {
+
+    h2 {
+        font-size: 1.35rem;
+    }
+
+    .btn {
+        font-size: 0.85rem;
+        padding: 6px 10px;
+    }
+
+    .chart-box {
+        height: 260px;
+    }
+
+    #topProductsChart {
+        height: 280px;
+    }
+}
+
+/* ==============================
+   MOBILE – DASHBOARD THẬT
+   ============================== */
+@media (max-width: 768px) {
+
+    /* 🔥 THU NHỎ TOÀN BỘ */
+    .reports-wrap {
+        transform: scale(0.92);
+        transform-origin: top center;
+    }
+
+    body {
+        overflow-x: hidden;
+    }
+
+    /* ===== Tiêu đề ===== */
+    h2 {
+        font-size: 1.15rem;
+        margin-bottom: 0.75rem;
+    }
+
+    /* ===== Card ===== */
+    .card-body {
+        padding: 10px;
+    }
+
+    .card-header,
+    .card-footer {
+        padding: 8px 10px;
+    }
+
+    /* ===== Filter ===== */
+    .form-label {
+        font-size: 0.75rem;
+        margin-bottom: 2px;
+    }
+
+    .form-control,
+    .form-select {
+        font-size: 0.8rem;
+        padding: 6px 8px;
+        height: auto;
+    }
+
+    .card-body .row.g-3 > div {
+        width: 100%;
+    }
+
+    .card-body .text-end {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+        text-align: left !important;
+    }
+
+    #btnExport {
+        grid-column: span 2;
+    }
+
+    .btn {
+        font-size: 0.75rem;
+        padding: 6px;
+    }
+
+    /* ===== Chart chính ===== */
+    .chart-box {
+        height: 190px;
+    }
+
+    /* ❌ BỎ CHART PHỤ */
+    .col-lg-4 {
+        display: none;
+    }
+
+    /* ===== Summary ===== */
+    .card-footer .row > .col:not(:first-child) {
+        display: none;
+    }
+
+    #totalRevenue {
+        font-size: 1rem;
+    }
+
+    /* ===== Table ===== */
+    #reportTable {
+        font-size: 0.75rem;
+    }
+
+    #reportTable th:nth-child(3),
+    #reportTable td:nth-child(3),
+    #reportTable th:nth-child(4),
+    #reportTable td:nth-child(4) {
+        display: none;
+    }
+
+    .table th,
+    .table td {
+        padding: 6px;
+    }
+}
+
+/* ==============================
+   VERY SMALL MOBILE
+   ============================== */
+@media (max-width: 576px) {
+
+    .reports-wrap {
+        transform: scale(0.9);
+    }
+
+    .chart-box {
+        height: 170px;
+    }
+}
+
+/* Toast */
+.toast-container .toast {
+    min-width: 200px;
+    margin-bottom: 8px;
+}
+
+.report-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.chart-box {
+    flex: 1;
+    position: relative;
+}
+
+
+</style>
+
+<div class="reports-wrap py-3">
+  <div class="container">
+
+    <!-- Title -->
+    <h2 class="page-title text-center mb-4">
+      <i class="bi bi-bar-chart-line-fill"></i>
+      Báo cáo & Thống kê
+    </h2>
+
+    <!-- Controls -->
+    <div class="card mb-4 shadow-sm report-card">
+      <div class="card-body">
+        <div class="row g-3 align-items-end">
+
+          <div class="col-lg-3 col-md-6">
+            <label class="form-label">
+              <i class="bi bi-calendar-range"></i> Khoảng thời gian
+            </label>
+            <select id="periodSelect" class="form-select form-select-sm">
+              <option value="ngay">Theo ngày</option>
+              <option value="tuan">Theo tuần</option>
+              <option value="thang" selected>Theo tháng</option>
+            </select>
+          </div>
+
+          <div class="col-lg-3 col-md-6">
+            <label class="form-label">
+              <i class="bi bi-box-seam"></i> Sản phẩm
+            </label>
+            <select id="productSelect" class="form-select form-select-sm">
+              <option value="">-- Tất cả sản phẩm --</option>
+            </select>
+          </div>
+
+          <div class="col-lg-3 col-md-6">
+            <label class="form-label">
+              <i class="bi bi-calendar-event"></i> Từ ngày
+            </label>
+            <input type="date" id="dateFrom" class="form-control form-control-sm">
+          </div>
+
+          <div class="col-lg-3 col-md-6">
+            <label class="form-label">
+              <i class="bi bi-calendar-check"></i> Đến ngày
+            </label>
+            <input type="date" id="dateTo" class="form-control form-control-sm">
+          </div>
+
+          <div class="col-12 text-end mt-2">
+            <button id="btnApply" class="btn btn-primary btn-sm">
+              <i class="bi bi-funnel-fill"></i> Áp dụng
+            </button>
+            <button id="btnReload" class="btn btn-outline-secondary btn-sm">
+              <i class="bi bi-arrow-clockwise"></i> Tải lại
+            </button>
+            <button id="btnExport" class="btn btn-success btn-sm">
+              <i class="bi bi-download"></i> Xuất CSV
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="row g-4 align-items-stretch">
+
+      <!-- Revenue -->
+      <div class="col-lg-7">
+        <div class="card shadow-sm report-card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <strong>
+              <i class="bi bi-cash-coin"></i> Doanh thu
+            </strong>
+            <small id="summaryRange" class="text-muted">—</small>
+          </div>
+
+          <div class="card-body">
+            <div class="chart-box">
+              <canvas id="revenueChart"></canvas>
+            </div>
+          </div>
+
+          <div class="card-footer">
+            <div class="row text-center small">
+
+              <div class="col">
+                <div class="fw-bold" id="totalRevenue">0 đ</div>
+                <div class="text-muted">Tổng</div>
+              </div>
+
+              <div class="col">
+                <div class="fw-bold" id="avgRevenue">0 đ</div>
+                <div class="text-muted">TB</div>
+              </div>
+
+              <div class="col">
+                <div class="fw-bold" id="maxRevenue">0 đ</div>
+                <div class="text-muted">Cao nhất</div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Products -->
+      <div class="col-lg-5">
+        <div class="card shadow-sm report-card">
+          <div class="card-header">
+            <strong>
+              <i class="bi bi-trophy-fill"></i> Bán chạy
+            </strong>
+          </div>
+          <div class="card-body">
+            <canvas id="topProductsChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Table -->
+    <div class="card mt-4 shadow-sm report-card">
+      <div class="card-header">
+        <strong>
+          <i class="bi bi-table"></i> Chi tiết báo cáo
+        </strong>
+      </div>
+
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-sm table-striped mb-0" id="reportTable">
+            <thead class="table-dark">
+              <tr>
+                <th>Khoá</th>
+                <th>Doanh thu</th>
+                <th>Số đơn</th>
+                <th>Sản phẩm</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colspan="4" class="text-center py-4 text-muted">
+                  <i class="bi bi-inbox"></i> Chưa có dữ liệu
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+<!-- Toast Container -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer"></div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  // === CSRF Token ===
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+      const cookies = document.cookie.split(";");
+      for (let cookie of cookies) {
+        cookie = cookie.trim();
+        if (cookie.startsWith(name + "=")) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+  const csrftoken = getCookie("csrftoken");
+
+  // --- Configurable API endpoints (tùy chỉnh nếu project khác) ---
+  const API_SALES = '/api/reports/sales/';
+  const API_TOP = '/api/reports/top_products/';
+
+  const periodSelect = document.getElementById('periodSelect');
+  const productSelect = document.getElementById('productSelect');
+  const dateFrom = document.getElementById('dateFrom');
+  const dateTo = document.getElementById('dateTo');
+  const btnApply = document.getElementById('btnApply');
+  const btnReload = document.getElementById('btnReload');
+  const btnExport = document.getElementById('btnExport');
+
+  const totalRevenueEl = document.getElementById('totalRevenue');
+  const avgRevenueEl = document.getElementById('avgRevenue');
+  const maxRevenueEl = document.getElementById('maxRevenue');
+  const summaryRange = document.getElementById('summaryRange');
+
+  const toastContainer = document.getElementById('toastContainer');
+
+  // --- Helpers ---
+  function showToast(msg, type='success') {
+    const color = type === 'error' ? 'bg-danger' : 'bg-success';
+    const icon = type === 'error' ? '❌' : '✅';
+    const t = document.createElement('div');
+    t.className = `toast align-items-center text-white ${color} border-0`;
+    t.innerHTML = `<div class="d-flex"><div class="toast-body">${icon} ${msg}</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`;
+    toastContainer.appendChild(t);
+    const bs = new bootstrap.Toast(t, { delay: 2500 });
+    bs.show();
+    t.addEventListener('hidden.bs.toast', () => t.remove());
+  }
+
+  function money(v) {
+    if (v === null || v === undefined) return '0 ₫';
+    return Number(v).toLocaleString('vi-VN') + ' ₫';
+  }
+
+  // --- Charts init ---
+  const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+  const topCtx = document.getElementById('topProductsChart').getContext('2d');
+
+  let revenueChart = new Chart(revenueCtx, {
+  type: 'line',
+  data: { labels: [], datasets: [{ label: 'Doanh thu', data: [], fill: true, tension: 0.2 }] },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false, // 🔥 QUAN TRỌNG
+    layout: {
+      padding: 0
+    },
+    plugins: {
+      legend: {
+        labels: {
+          boxHeight: 12
+        }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: v => Number(v).toLocaleString('vi-VN')
+        }
+      }
+    }
+  }
+});
+
+  let topChart = new Chart(topCtx, {
+  type: 'bar',
+  data: { labels: [], datasets: [{ label: 'Doanh thu', data: [] }] },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,  // 🔥 cái này làm chart cao theo CSS
+    scales: {
+      x: {
+        ticks: {
+          callback: v => Number(v).toLocaleString('vi-VN')
+        }
+      }
+    }
+  }
+});
+
+
+  // --- Load product list ---
+  async function loadProducts() {
+    try {
+      const res = await fetch('/api/products/sanpham/', {
+        headers: {
+          "X-CSRFToken": csrftoken
+        }
+      });
+      if (!res.ok) throw new Error('Không tải được danh sách sản phẩm');
+      const data = await res.json();
+      productSelect.innerHTML = '<option value="">-- Tất cả sản phẩm --</option>';
+      data.forEach(p => {
+        productSelect.insertAdjacentHTML('beforeend', `<option value="${p.id}">${p.ten_san_pham}</option>`);
+      });
+    } catch (e) {
+      console.error(e);
+      showToast('Không tải được danh sách sản phẩm', 'error');
+    }
+  }
+
+  // --- Fetch sales ---
+  async function loadSales() {
+    const kieu = periodSelect.value;
+    const product = productSelect.value;
+    const from = dateFrom.value;
+    const to = dateTo.value;
+
+    const params = new URLSearchParams();
+    params.set('kieu', kieu);
+    if (product) params.set('product', product);
+    if (from) params.set('from', from);
+    if (to) params.set('to', to);
+
+    try {
+      const res = await fetch(API_SALES + '?' + params.toString(), {
+        headers: {
+          "X-CSRFToken": csrftoken
+        }
+      });
+      if (!res.ok) throw new Error('Lỗi tải số liệu');
+      const data = await res.json();
+      updateRevenueChart(data);
+      updateReportTable(data);
+      updateSummary(data);
+      await loadTopProducts();
+      showToast('Đã cập nhật báo cáo');
+    } catch (e) {
+      console.error(e);
+      showToast('Lỗi tải báo cáo', 'error');
+    }
+  }
+
+  function updateRevenueChart(data) {
+    const labels = data.map(r => r.key);
+    const values = data.map(r => Number(r.doanh_thu || 0));
+    revenueChart.data.labels = labels;
+    revenueChart.data.datasets[0].data = values;
+    revenueChart.update();
+  }
+
+  function updateReportTable(data) {
+    const tbody = document.querySelector('#reportTable tbody');
+    tbody.innerHTML = '';
+    if (!data.length) {
+      tbody.innerHTML = '<tr><td colspan="4" class="text-center p-4 text-muted">Không có dữ liệu</td></tr>';
+      return;
+    }
+    data.forEach(r => {
+      const row = `<tr>
+        <td>${r.key}</td>
+        <td>${Number(r.doanh_thu||0).toLocaleString('vi-VN')} ₫</td>
+        <td>${r.so_don || 0}</td>
+        <td>${r.so_san_pham || 0}</td>
+      </tr>`;
+      tbody.insertAdjacentHTML('beforeend', row);
+    });
+  }
+
+  function updateSummary(data) {
+    const total = data.reduce((s, r) => s + Number(r.doanh_thu || 0), 0);
+    const avg = data.length ? Math.round(total / data.length) : 0;
+    const mx = data.length ? Math.max(...data.map(d => Number(d.doanh_thu || 0))) : 0;
+
+    totalRevenueEl.textContent = money(total);
+    avgRevenueEl.textContent = money(avg);
+    maxRevenueEl.textContent = money(mx);
+
+    const f = dateFrom.value || '—';
+    const t = dateTo.value || '—';
+    summaryRange.textContent = `Khoảng: ${f} → ${t} (kieu=${periodSelect.value})`;
+  }
+
+  // --- Top products ---
+  async function loadTopProducts() {
+    try {
+      const params = new URLSearchParams({
+        period: periodSelect.value,
+        limit: 10
+      });
+
+      const res = await fetch(API_TOP + '?' + params.toString(), {
+        headers: {
+          "X-CSRFToken": csrftoken
+        }
+      });
+
+      if (!res.ok) throw new Error('Không tải được top sản phẩm');
+
+      const data = await res.json();
+      const labels = data.map(d => d.ten);
+      const values = data.map(d => Number(d.value || 0));
+
+      topChart.data.labels = labels;
+      topChart.data.datasets[0].data = values;
+      topChart.update();
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  // --- Export CSV ---
+  function exportCSV() {
+    const rows = [];
+    const hdr = ['key', 'doanh_thu', 'so_don', 'so_san_pham'];
+    rows.push(hdr.join(','));
+
+    document.querySelectorAll('#reportTable tbody tr').forEach(tr => {
+      const cols = Array.from(tr.children).map(td => td.textContent.replace(/,/g, '').trim());
+      if (cols.length >= 4) rows.push(cols.join(','));
+    });
+
+    const csv = rows.join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `baocao_${periodSelect.value}_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+
+    URL.revokeObjectURL(url);
+  }
+
+  // --- Events ---
+  btnApply.addEventListener('click', loadSales);
+  btnReload.addEventListener('click', () => {
+    periodSelect.value = 'thang';
+    productSelect.value = '';
+    dateFrom.value = '';
+    dateTo.value = '';
+    loadSales();
+  });
+  btnExport.addEventListener('click', exportCSV);
+
+  // Init
+  (async function init() {
+    await loadProducts();
+    await loadSales();
+  })();
+
+});
+</script>
+
+<style>
+  /* Small cosmetics */
+  #revenueChart { max-height: 320px; }
+  #topProductsChart { max-height: 420px; }
+  .toast-container .toast { min-width: 220px; margin-bottom: 8px; }
+</style>
+{% endblock dashboard_content%}
