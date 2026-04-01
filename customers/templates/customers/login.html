@@ -1,0 +1,115 @@
+<!doctype html>
+<html>
+<head>
+  <title>Đăng nhập</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f6fa;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .login-container {
+      background: #fff;
+      padding: 30px 35px;
+      width: 350px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      border: 2px solid #e0e0e0;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #2d3436;
+    }
+
+    label {
+      font-weight: bold;
+      color: #2d3436;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 15px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #0984e3;
+      color: white;
+      border: none;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background: #0873c8;
+    }
+
+    .messages p {
+      text-align: center;
+      font-weight: bold;
+      color: red;
+    }
+
+    .register-link {
+      text-align: center;
+      margin-top: 15px;
+    }
+
+    .register-link a {
+      color: #0984e3;
+      text-decoration: none;
+    }
+
+    .register-link a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="login-container">
+    <h1>Đăng nhập</h1>
+
+    <!-- messages -->
+    <div class="messages">
+      {% if messages %}
+        {% for message in messages %}
+          <p>{{ message }}</p>
+        {% endfor %}
+      {% endif %}
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+
+      <label>Username</label>
+      {{ form.username }}
+
+      <label>Mật khẩu:</label>
+      {{ form.password }}
+
+      <button type="submit">Đăng nhập</button>
+    </form>
+
+    <div class="register-link">
+      Chưa có tài khoản?
+      <a href="{% url 'register_cus' %}">Đăng ký</a>
+    </div>
+  </div>
+</body>
+</html>

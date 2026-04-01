@@ -1,0 +1,117 @@
+{% extends "buystore/base.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Đơn hàng của tôi - BuyStore{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Đơn hàng của tôi</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert 
+                {% if message.tags == 'success' %}alert-success
+                {% elif message.tags == 'error' %}alert-danger
+                {% elif message.tags == 'warning' %}alert-warning
+                {% else %}alert-info{% endif %} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Mã đơn</th>
+                    <th>Ngày đặt</th>
+                    <th>Trạng thái</th>
+                    <th>Tổng tiền</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td>
+                        <a href="{% url 'store_order_detail' order.id %}" class="order-id-link">
+                            <strong>{{ order.id }}</strong>
+                        </a>
+                    </td>
+                    <td>{{ order.ngay_dat|date:"d/m/Y H:i" }}</td>
+                    <td>
+                        {% if order.trang_thai == 'CHO' %}
+                            <span class="badge bg-warning text-dark">Chờ xác nhận</span>
+                        {% elif order.trang_thai == 'DANG' %}
+                            <span class="badge bg-primary">Đang giao</span>
+                        {% elif order.trang_thai == 'DA' %}
+                            <span class="badge bg-success">Hoàn tất</span>
+                        {% elif order.trang_thai == 'HUY' %}
+                            <span class="badge bg-danger">Đã hủy</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <strong>{{ order.tong_tien|floatformat:0|intcomma }}đ</strong>
+                    </td>
+                    <td>
+                        {% if order.trang_thai == 'CHO' %}
+                            <a href="{% url 'store_cancel_order' order.id %}" 
+                               class="btn btn-danger btn-sm"
+                               onclick="return confirm('Bạn có chắc muốn hủy đơn hàng #{{ order.id }}?')">
+                               Hủy đơn
+                            </a>
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center py-4">Chưa có đơn hàng nào.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<style>
+    .order-id-link {
+    text-decoration: none; 
+    color: #0d6efd;       
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: all 0.2s ease-in-out;
+}
+
+.order-id-link:hover {
+    background-color: #e7f1ff; 
+    color: #0a58ca;            
+    text-decoration: none;    
+}
+
+@media (max-width: 768px) {
+
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+        font-size: 14px;
+    }
+
+    h2 {
+        text-align: center;
+        font-size: 20px;
+    }
+
+    .btn {
+        font-size: 13px;
+        padding: 6px 10px;
+    }
+}
+
+
+</style>
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends "buystore/base.html" %}
+{% load humanize %}
+
+{% block title %}Chi tiết đơn hàng #{{ order.id }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Chi tiết đơn hàng #{{ order.id }}</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert 
+                {% if message.tags == 'success' %}alert-success
+                {% elif message.tags == 'error' %}alert-danger
+                {% elif message.tags == 'warning' %}alert-warning
+                {% else %}alert-info{% endif %} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Thông tin khách hàng và trạng thái -->
+    <div class="card mb-4 p-3 shadow-sm">
+        <h5>Thông tin người nhận</h5>
+        <p>
+            <strong>Họ tên:</strong> {{ order.khach_hang.ten }}<br>
+            <strong>SĐT:</strong> {{ order.khach_hang.sdt }}<br>
+            <strong>Địa chỉ:</strong> {{ order.khach_hang.dia_chi }}<br>
+            <strong>Ngày đặt:</strong> {{ order.ngay_dat|date:"d/m/Y H:i" }}<br>
+            <strong>Trạng thái:</strong>
+            {% if order.trang_thai == 'CHO' %}
+                <span class="badge bg-warning text-dark">Chờ xác nhận</span>
+            {% elif order.trang_thai == 'DANG' %}
+                <span class="badge bg-primary">Đang giao</span>
+            {% elif order.trang_thai == 'DA' %}
+                <span class="badge bg-success">Hoàn tất</span>
+            {% elif order.trang_thai == 'HUY' %}
+                <span class="badge bg-danger">Đã hủy</span>
+            {% endif %}
+        </p>
+    </div>
+
+    <!-- Danh sách sản phẩm -->
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Hình ảnh</th>
+                    <th>Sản phẩm</th>
+                    <th>Giá</th>
+                    <th>Số lượng</th>
+                    <th>Thành tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>
+                        {% if item.product.hinh_anh %}
+                            <a href="{% url 'store_product_detail' item.product.ma_san_pham %}">
+                                <img src="{{ item.product.hinh_anh.url }}"
+                                    alt="{{ item.product.ten_san_pham }}"
+                                    width="60"
+                                    style="cursor: pointer;">
+                            </a>
+                        {% endif %}
+                    </td>
+                    <td>{{ item.product.ten_san_pham }}</td>
+                    <td>{{ item.price|floatformat:0|intcomma }}đ</td>
+                    <td>{{ item.qty }}</td>
+                    <td>{{ item.line_total|floatformat:0|intcomma }}đ</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Tổng tiền đơn hàng -->
+    <h5 class="mt-3">
+        Tổng tiền:
+        <strong>{{ order.tong_tien|floatformat:0|intcomma }}đ</strong>
+    </h5>
+
+    <!-- Nút quay lại -->
+    <a href="{% url 'store_order_history' %}" class="btn btn-secondary mt-3">← Quay lại</a>
+</div>
+{% endblock %}

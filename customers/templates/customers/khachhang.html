@@ -1,0 +1,657 @@
+{% extends 'base.html' %}
+{% block dashboard_content %}
+
+<head>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+
+
+<div class="container mt-4">
+  <h2 class="mb-4">
+    <i class="bi bi-people-fill me-2 text-primary"></i>
+    Quản lý khách hàng
+  </h2>
+
+  <!-- Thanh tìm kiếm và nút thêm -->
+  <div class="card p-3 mb-4 shadow-sm">
+    <div class="row g-3 align-items-center">
+      <div class="col-md-6">
+        <div class="input-group">
+          <span class="input-group-text bg-light">
+            <i class="bi bi-search"></i>
+          </span>
+          <input type="text"
+                 id="searchInput"
+                 class="form-control"
+                 placeholder="Nhập tên hoặc số điện thoại để tìm kiếm...">
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <button id="btnSearch" class="btn btn-primary w-100">
+          <i class="bi bi-search me-1"></i>
+          Tìm kiếm
+        </button>
+      </div>
+
+      <div class="col-md-3">
+        <button id="btnAdd" class="btn btn-success w-100">
+          <i class="bi bi-person-plus-fill me-1"></i>
+          Thêm khách hàng
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bảng danh sách khách hàng -->
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h5>
+        <i class="bi bi-list-ul me-2"></i>
+        Danh sách khách hàng
+      </h5>
+
+      <div class="table-responsive">
+        <table class="table table-striped table-bordered mt-3 text-center align-middle" id="customerTable">
+          <thead class="table-dark">
+            <tr>
+              <th>ID</th>
+              <th>Tên</th>
+              <th>SĐT</th>
+              <th>Email</th>
+              <th>Địa chỉ</th>
+              <th>Số lượt mua</th>
+              <th>Ngày tạo</th>
+              <th>Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="8" class="text-muted">
+                Đang tải dữ liệu...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal thêm / sửa khách hàng -->
+<div class="modal fade" id="khachHangModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content shadow-lg">
+      <form id="formKhachHang">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title" id="modalTitle">
+            <i class="bi bi-person-lines-fill me-2"></i>
+            Thêm khách hàng
+          </h5>
+          <button type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body row g-3">
+          <input type="hidden" id="khachHangId">
+
+          <div class="col-md-6">
+            <label class="form-label">
+              <i class="bi bi-person me-1"></i>
+              Tên khách hàng
+            </label>
+            <input type="text" id="ten" class="form-control" required>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">
+              <i class="bi bi-telephone me-1"></i>
+              Số điện thoại
+            </label>
+            <input type="text" id="sdt" class="form-control" required>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">
+              <i class="bi bi-envelope me-1"></i>
+              Email
+            </label>
+            <input type="email" id="email" class="form-control">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">
+              <i class="bi bi-geo-alt me-1"></i>
+              Địa chỉ
+            </label>
+            <input type="text" id="dia_chi" class="form-control">
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            Đóng
+          </button>
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-save me-1"></i>
+            Lưu
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal xác nhận xóa -->
+<div class="modal fade" id="xoaModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center p-3 shadow-lg">
+      <div class="modal-body">
+        <div class="mb-3">
+          <i class="bi bi-trash3-fill text-danger" style="font-size: 3rem;"></i>
+        </div>
+
+        <h4 class="fw-bold">Xác nhận xóa</h4>
+
+        <p class="mt-2">
+          Bạn có chắc chắn muốn xóa khách hàng
+          <strong id="tenKhachHangXoa"></strong>
+          không?
+        </p>
+      </div>
+
+      <div class="modal-footer justify-content-center border-0">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Hủy
+        </button>
+        <button type="button" id="btnXacNhanXoa" class="btn btn-danger">
+          <i class="bi bi-trash me-1"></i>
+          Xóa
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 🔔 Toast Container -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+#customerTable td:nth-child(2) {
+  max-width: 180px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#customerTable td, #customerTable th {
+  vertical-align: middle;
+}
+#customerTable tbody tr:hover {
+  background-color: #f2f6ff;
+  transition: 0.2s;
+}
+#xoaModal .modal-content {
+  border-radius: 12px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+}
+#xoaModal .btn-danger {
+  font-weight: bold;
+}
+
+/* ✅ Responsive Table */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+#customerTable {
+  min-width: 900px;
+}
+@media (max-width: 768px) {
+  .card-body h5 {
+    font-size: 1rem;
+  }
+  #customerTable th, #customerTable td {
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+  .card .row {
+    flex-direction: column;
+  }
+}
+
+#khachHangModal .modal-content {
+    border-radius: 14px;
+    padding: 10px 10px 0 10px;
+    box-shadow: 0 10px 35px rgba(0,0,0,0.2);
+    animation: fadeUp 0.25s ease-out;
+    border: none;
+}
+
+/* Animation mở modal giống sản phẩm */
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Header */
+#khachHangModal .modal-header {
+    border-bottom: none;
+    padding: 18px 24px 0;
+}
+
+#khachHangModal .modal-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #fdfeff;
+    margin-bottom: 5px;
+}
+
+/* Body Form */
+#khachHangModal .modal-body {
+    padding: 5px 24px 10px;
+}
+
+/* Label */
+#khachHangModal label.form-label {
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #333;
+}
+
+/* Input */
+#khachHangModal input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ccd2dc;
+    background: #fafbff;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: 0.2s;
+}
+
+#khachHangModal input:focus {
+    border-color: #3c80ff;
+    box-shadow: 0 0 0 3px rgba(60,128,255,0.15);
+}
+
+/* Grid giống sản phẩm – 2 cột */
+#khachHangModal .modal-body .row.g-3 > div {
+    margin-bottom: 6px;
+}
+
+/* Footer */
+#khachHangModal .modal-footer {
+    border-top: none;
+    padding: 15px 24px 22px;
+}
+
+/* Nút Đóng */
+#khachHangModal .btn-secondary {
+    padding: 8px 18px;
+    background: #6c757d;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+}
+
+/* Nút Lưu */
+#khachHangModal .btn-primary {
+    padding: 8px 22px;
+    background: #28a745 !important;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+}
+
+#khachHangModal .btn-primary:hover {
+    background: #208838 !important;
+}
+
+/* ===============================
+   RESPONSIVE KHÁCH HÀNG – CSS ONLY
+   =============================== */
+
+/* Desktop giữ nguyên */
+@media (min-width: 992px) {
+  #customerTable {
+    min-width: 900px;
+  }
+}
+
+/* Tablet */
+@media (max-width: 991px) {
+  #customerTable {
+    min-width: 800px;
+  }
+}
+
+/* 🔥 Mobile fix TRIỆT ĐỂ */
+@media (max-width: 767px) {
+
+  /* Cho phép scroll ngang thật */
+  .table-responsive {
+    overflow-x: auto;
+    position: relative;
+  }
+
+  /* ❌ Không ép bảng quá rộng */
+  #customerTable {
+    min-width: unset;
+    width: 100%;
+  }
+
+  #customerTable th,
+  #customerTable td {
+    font-size: 0.8rem;
+    white-space: nowrap;
+    padding: 6px 8px;
+  }
+
+  /* UX hint: mờ hai bên báo hiệu có thể kéo */
+  .table-responsive::after {
+    content: "← Vuốt ngang để xem thêm →";
+    display: block;
+    text-align: center;
+    font-size: 0.75rem;
+    color: #888;
+    padding: 6px 0;
+  }
+}
+
+/* ===============================
+   MOBILE – TỐI GIẢN BẢNG KHÁCH HÀNG
+   CSS ONLY – KHÔNG JS
+   =============================== */
+@media (max-width: 768px) {
+
+  /* ❌ Tắt scroll ngang hoàn toàn */
+  .table-responsive {
+    overflow-x: visible;
+  }
+
+  /* ✅ Bảng full width */
+  #customerTable {
+    min-width: 100%;
+    width: 100%;
+  }
+
+  /* ===== ẨN CỘT KHÔNG CẦN ===== */
+  /* Email */
+  #customerTable th:nth-child(4),
+  #customerTable td:nth-child(4),
+  /* Địa chỉ */
+  #customerTable th:nth-child(5),
+  #customerTable td:nth-child(5),
+  /* Số lượt mua */
+  #customerTable th:nth-child(6),
+  #customerTable td:nth-child(6),
+  /* Ngày tạo */
+  #customerTable th:nth-child(7),
+  #customerTable td:nth-child(7) {
+    display: none;
+  }
+
+  /* ===== CỘT CÒN LẠI ===== */
+  #customerTable th,
+  #customerTable td {
+    font-size: 0.85rem;
+    padding: 8px 6px;
+    white-space: nowrap;
+  }
+
+  /* Tên khách hàng rõ hơn */
+  #customerTable td:nth-child(2) {
+    font-weight: 600;
+    max-width: 160px;
+  }
+
+  /* ===== NÚT HÀNH ĐỘNG GỌN ===== */
+  #customerTable td:last-child {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  #customerTable td:last-child button {
+    padding: 4px 8px;
+    font-size: 0.8rem;
+  }
+}
+
+/* Desktop */
+#khachHangModal .modal-dialog {
+    margin-top: 100px;   /* ⬅ đẩy xuống vừa phải */
+}
+
+/* Tablet */
+@media (max-width: 991px) {
+    #khachHangModal .modal-dialog {
+        margin-top: 100px;
+    }
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+    #khachHangModal .modal-dialog {
+        margin-top: 120px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const API_URL = "/api/customers/khachhang/";
+  const tableBody = document.querySelector("#customerTable tbody");
+
+  const modal = new bootstrap.Modal(document.getElementById("khachHangModal"));
+  const xoaModal = new bootstrap.Modal(document.getElementById("xoaModal"));
+
+  const form = document.getElementById("formKhachHang");
+  const tenKhachHangXoa = document.getElementById("tenKhachHangXoa");
+  const btnXacNhanXoa = document.getElementById("btnXacNhanXoa");
+  const toastContainer = document.getElementById("toastContainer");
+
+  let idCanXoa = null;
+
+  const searchInput = document.getElementById("searchInput");
+  const btnSearch = document.getElementById("btnSearch");
+  const btnAdd = document.getElementById("btnAdd");
+
+  // 🔒 Lấy CSRF token từ cookie
+  function getCookie(name) {
+    const cookies = document.cookie.split(";").map(c => c.trim());
+    for (let cookie of cookies) {
+      if (cookie.startsWith(name + "=")) {
+        return decodeURIComponent(cookie.split("=")[1]);
+      }
+    }
+    return null;
+  }
+  const csrftoken = getCookie("csrftoken");
+
+  // 🔔 Toast mini
+  function showToast(message, type = "success") {
+    const color = type === "error" ? "bg-danger" :
+                  type === "warning" ? "bg-warning" : "bg-success";
+    const icon = type === "error" ? "❌" :
+                 type === "warning" ? "⚠️" : "✅";
+
+    const toast = document.createElement("div");
+    toast.className = `toast align-items-center text-white ${color} border-0`;
+    toast.style.zIndex = "9999";
+    toast.innerHTML = `
+      <div class="d-flex">
+        <div class="toast-body fw-semibold">${icon} ${message}</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+      </div>`;
+
+    toastContainer.appendChild(toast);
+    const bsToast = new bootstrap.Toast(toast, { delay: 2000 });
+    bsToast.show();
+    toast.addEventListener("hidden.bs.toast", () => toast.remove());
+  }
+
+  // 📌 Load danh sách khách hàng
+  async function loadKhachHang() {
+    try {
+      const res = await fetch(API_URL);
+      const data = await res.json();
+      renderTable(data);
+    } catch {
+      tableBody.innerHTML = `<tr><td colspan="8">❌ Không thể tải dữ liệu</td></tr>`;
+    }
+  }
+
+  // 📌 Render bảng
+  function renderTable(data) {
+    tableBody.innerHTML = "";
+
+    if (!data.length) {
+      tableBody.innerHTML = `<tr><td colspan="8">Không có khách hàng nào.</td></tr>`;
+      return;
+    }
+
+    data.forEach(kh => {
+      const row = `
+        <tr>
+          <td>${kh.id}</td>
+          <td>${kh.ten}</td>
+          <td>${kh.sdt}</td>
+          <td>${kh.email || "—"}</td>
+          <td>${kh.dia_chi || "—"}</td>
+          <td>${kh.so_luot_mua || 0}</td>
+          <td>${new Date(kh.ngay_tao).toLocaleString()}</td>
+          <td class="action-cell">
+            <button class="btn btn-outline-warning btn-action"
+                    title="Sửa"
+                    onclick="suaKhachHang(${kh.id})">
+              <i class="bi bi-pencil-square"></i>
+            </button>
+
+            <button class="btn btn-outline-danger btn-action"
+                    title="Xóa"
+                    onclick="xoaKhachHang(${kh.id})">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>`;
+      tableBody.insertAdjacentHTML("beforeend", row);
+    });
+  }
+
+  // ➕ Thêm khách hàng
+  btnAdd.addEventListener("click", () => {
+    form.reset();
+    document.getElementById("khachHangId").value = "";
+    document.getElementById("modalTitle").textContent = "Thêm khách hàng";
+    modal.show();
+  });
+
+  // 💾 Lưu (Thêm / Sửa)
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const id = document.getElementById("khachHangId").value;
+    const data = {
+      ten: document.getElementById("ten").value,
+      sdt: document.getElementById("sdt").value,
+      email: document.getElementById("email").value,
+      dia_chi: document.getElementById("dia_chi").value
+    };
+
+    const method = id ? "PATCH" : "POST";
+    const url = id ? `${API_URL}${id}/` : API_URL;
+
+    const res = await fetch(url, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": csrftoken     
+      },
+      body: JSON.stringify(data)
+    });
+
+    if (res.ok) {
+      modal.hide();
+      showToast("Lưu thông tin khách hàng thành công!");
+      loadKhachHang();
+    } else {
+      showToast("Lỗi khi lưu khách hàng!", "error");
+    }
+  });
+
+  // ✏️ Sửa khách hàng
+  window.suaKhachHang = async (id) => {
+    const res = await fetch(`${API_URL}${id}/`);
+    const kh = await res.json();
+
+    document.getElementById("khachHangId").value = kh.id;
+    document.getElementById("ten").value = kh.ten;
+    document.getElementById("sdt").value = kh.sdt;
+    document.getElementById("email").value = kh.email || "";
+    document.getElementById("dia_chi").value = kh.dia_chi || "";
+
+    document.getElementById("modalTitle").textContent = "Sửa khách hàng";
+    modal.show();
+  };
+
+  // 🗑️ Chuẩn bị xóa
+  window.xoaKhachHang = async (id) => {
+    const res = await fetch(`${API_URL}${id}/`);
+    const kh = await res.json();
+
+    idCanXoa = id;
+    tenKhachHangXoa.textContent = kh.ten;
+
+    xoaModal.show();
+  };
+
+  // ✔️ Xác nhận xóa
+  btnXacNhanXoa.addEventListener("click", async () => {
+    if (!idCanXoa) return;
+
+    const res = await fetch(`${API_URL}${idCanXoa}/`, {
+      method: "DELETE",
+      headers: {
+        "X-CSRFToken": csrftoken     // 🔥 BẮT BUỘC CHO DELETE
+      }
+    });
+
+    if (res.ok) {
+      xoaModal.hide();
+      showToast("Đã xóa khách hàng!");
+      loadKhachHang();
+    } else {
+      showToast("Không thể xóa khách hàng!", "error");
+    }
+  });
+
+  // 🔍 Tìm kiếm
+  async function timKiemKhachHang() {
+    const keyword = searchInput.value.trim().toLowerCase();
+    const res = await fetch(API_URL);
+    const data = await res.json();
+
+    const filtered = keyword
+      ? data.filter(kh =>
+          kh.ten.toLowerCase().includes(keyword) ||
+          kh.sdt.includes(keyword)
+        )
+      : data;
+
+    renderTable(filtered);
+  }
+
+  btnSearch.addEventListener("click", timKiemKhachHang);
+  searchInput.addEventListener("input", timKiemKhachHang);
+
+  loadKhachHang();
+});
+</script>
+
+{% endblock dashboard_content %}

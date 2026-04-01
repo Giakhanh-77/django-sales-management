@@ -1,0 +1,888 @@
+{% load static %} 
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BuyStore{% endblock %}</title>
+
+    <!-- Font Roboto -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: #f3f4f6;
+            font-family: 'Roboto', sans-serif;
+            padding-top: 80px;
+        }
+
+        /* HEADER 1 - TOP RED BAR */
+        .topbar {
+            background: #D70018;
+            padding: 10px 0;
+            color: #fff;
+             position: sticky;
+             top: 0;
+             z-index: 1000;
+        }
+        .topbar .logo {
+            font-size: 25px;
+            font-weight: 700;
+        }
+
+        /* MENU DANH MỤC TRÁI */
+        .category-box {
+            width: 260px;
+            background: #fff;
+            border-radius: 8px;
+            margin-top: 15px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+
+        .category-title {
+            background: #D70018;
+            padding: 12px 16px;
+            color: #fff;
+            font-weight: 600;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+        }
+
+        .category-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .category-list li {
+            padding: 10px 15px;
+            border-bottom: 1px solid #f1f1f1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.15s;
+            font-size: 15px;
+        }
+
+        .category-list li:hover {
+            background: #f7f7f7;
+            color: #D70018;
+        }
+
+        .category-list li i {
+            font-size: 17px;
+            width: 22px;
+            text-align: center;
+        }
+        /* GIỮ SIDEBAR KHÔNG KÉO DÀI VỚI NỘI DUNG */
+.category-box {
+    width: 260px;
+    background: #fff;
+    border-radius: 8px;
+    margin-top: 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+
+    /* CHUẨN CELLPHONES */
+    position: sticky;
+    top: 80px;
+    height: fit-content;
+}
+
+
+        /* Tùy chỉnh layout: Cột trái + nội dung */
+        .main-layout {
+            display: flex;
+            gap: 25px;
+        }
+
+        .content-area {
+            flex: 1;
+        }
+
+        /* CARD PRODUCT */
+        .product-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 6px 18px rgba(22, 28, 36, 0.06);
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            transition: transform .14s ease, box-shadow .14s ease;
+            overflow: hidden;
+        }
+
+        .product-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 14px 34px rgba(22, 28, 36, 0.12);
+        }
+
+        .product-card .img-wrap {
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            background: #fafafa;
+            border-radius: 8px;
+        }
+
+        .product-card .product-name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #222;
+            min-height: 2.4rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .product-card .price {
+            margin-top: auto;
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: #d40000;
+        }
+
+        footer {
+            background: #fff;
+            padding: 20px 0;
+            margin-top: 40px;
+            border-top: 1px solid #eee;
+            text-align: center;
+        }
+        .buy-btn, .detail-btn {
+    width: 100%;
+    padding: 8px;
+    font-weight: 600;
+    border-radius: 6px;
+    margin-top: 6px;
+}
+
+.buy-btn {
+    background: #D70018;
+    color: #fff;
+    border: none;
+}
+
+.buy-btn:hover {
+    background: #b30014;
+}
+
+.detail-btn {
+    background: #f3f4f6;
+    border: 1px solid #ddd;
+}
+
+.detail-btn:hover {
+    background: #e5e7eb;
+}
+/* Toast container */
+.toast-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 2000;
+}
+
+/* Toast box */
+.toast-msg {
+    min-width: 250px;
+    padding: 12px 18px;
+    margin-top: 10px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    animation: fadeIn 0.4s ease, fadeOut 0.4s ease 3s forwards;
+}
+
+.toast-success { background: #28a745; }
+.toast-error   { background: #dc3545; }
+.toast-warning { background: #ffc107; color: black; }
+.toast-info    { background: #0dcaf0; }
+
+/* Animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateX(50px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes fadeOut {
+    from { opacity: 1; transform: translateX(0); }
+    to   { opacity: 0; transform: translateX(50px); }
+}
+.search-wrapper {
+    position: relative;
+}
+
+.search-input {
+    height: 45px;
+    padding-right: 50px; /* chừa chỗ cho nút */
+}
+
+.search-btn {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 36px;
+    width: 36px;
+    border: none;
+    background: #ff0000ff; /* màu cam Shopee */
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+}
+html, body {
+    height: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+footer {
+    margin-top: auto;
+}
+.topbar {
+    height: 70px;              
+    display: flex;
+    align-items: center;       
+}
+.logo-img {
+    height: 60px;         
+    width: auto;
+
+    transform: translate(-10px, -5px) scale(2);
+    transform-origin: left center;
+}
+.topbar {
+    background: #D70018;
+    padding: 10px 0;
+    color: #fff;
+    position: fixed;       
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1100;         
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1); 
+}
+
+/* ================= MOBILE GLOBAL ================= */
+@media (max-width: 768px) {
+
+    /* ===== BODY ===== */
+    body {
+        padding-top: 56px;
+    }
+
+    /* ===== TOPBAR ===== */
+    .topbar {
+        padding: 6px 0;
+    }
+
+    .topbar .container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: nowrap;
+    }
+
+    /* ===== LOGO ===== */
+    .logo-img {
+        height: 30px;
+        width: auto;
+        flex-shrink: 0;
+        position: relative;
+        z-index: 5;
+    }
+
+    /* ===== SEARCH (INLINE) ===== */
+    .search-box {
+        flex: unset;            /* ❗ BỎ flex:1 để không đè */
+        width: 55%;             /* ❗ giới hạn vùng click */
+        max-width: 55%;
+        overflow: hidden;       /* ❗ cắt vùng thừa */
+        position: relative;
+        z-index: 1;
+    }
+
+    .search-wrapper {
+        width: 100%;
+        position: relative;
+        pointer-events: auto;
+    }
+
+    .search-input {
+        height: 30px;
+        font-size: 13px;
+        border-radius: 6px;
+        padding: 4px 32px 4px 10px;
+    }
+
+    .search-btn {
+        position: absolute;
+        right: 3px;
+        top: 50%;
+        transform: translateY(-50%);
+        height: 22px;
+        width: 22px;
+        border-radius: 5px;
+    }
+
+    .search-btn i {
+        font-size: 12px;
+    }
+
+    /* ===== ICON / AUTH ===== */
+    .topbar .d-flex.align-items-center.text-white {
+        gap: 6px;
+        font-size: 12px;
+        flex-shrink: 0;
+        position: relative;
+        z-index: 10;            /* ❗ icon luôn nằm trên */
+    }
+
+    .topbar .bi {
+        font-size: 18px;
+        position: relative;
+        z-index: 10;
+    }
+
+    .topbar .btn,
+    .order-btn {
+        padding: 4px 6px;
+        font-size: 12px;
+        border-radius: 6px;
+        position: relative;
+        z-index: 10;
+    }
+
+    /* ❌ BỎ TÊN USER */
+    .topbar span.me-3,
+    .topbar .user-name,
+    .topbar .username {
+        display: none !important;
+    }
+    @media (max-width: 768px) {
+
+        /* ❌ ẨN DANH MỤC SẢN PHẨM */
+        .category-box {
+            display: none !important;
+        }
+
+        /* ❌ ẨN LUÔN KHỐI BÁN CHẠY BÊN TRÁI (nếu còn) */
+        .featured-left {
+            display: none !important;
+        }
+}
+    /* ===== MAIN LAYOUT ===== */
+    .main-layout {
+        flex-direction: column;
+    }
+
+    .left-sidebar-fixed {
+        display: none;
+    }
+
+    .content-area {
+        width: 100%;
+    }
+
+    /* ===== FOOTER ===== */
+    footer {
+        font-size: 13px;
+        padding: 12px 10px;
+    }
+}
+
+/* ================= BÁN CHẠY ================= */
+
+.featured-box {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 14px 14px 18px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+/* Title */
+.featured-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #D70018;
+    margin-bottom: 12px;
+}
+
+/* Slider container */
+.featured-slider {
+    position: relative;
+    height: 260px;
+    overflow: hidden;
+}
+
+/* Item */
+.featured-item {
+    position: absolute;
+    inset: 0;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    text-decoration: none;
+    color: inherit;
+
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.6s ease;
+
+    pointer-events: none;
+}
+
+/* Active item */
+.featured-item.active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+/* Image */
+.featured-item img {
+    width: 160px;
+    height: 140px;
+    object-fit: contain;
+    margin-bottom: 10px;
+    transition: transform 0.3s ease;
+}
+
+/* Hover image */
+.featured-item:hover img {
+    transform: scale(1.05);
+}
+
+/* Info */
+.featured-info {
+    text-align: center;
+}
+
+.featured-info .name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.35;
+    margin-bottom: 4px;
+
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.featured-info .price {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #e63946;
+}
+
+/* Mobile: ẩn bán chạy */
+@media (max-width: 768px) {
+    .featured-box {
+        display: none;
+    }
+}
+
+/* ===== SIDEBAR CỐ ĐỊNH ===== */
+.left-sidebar-fixed {
+    position: sticky;
+    top: 90px; /* cách header */
+    display: flex;
+    flex-direction: column;
+    gap: 18px; 
+    height: fit-content;
+}
+
+.featured-box {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+
+    /* 🔴 tạo cảm giác tách khỏi khối trên */
+    margin-top: 6px;
+}
+
+/* Giảm chiều cao tổng */
+.featured-slider {
+    height: 230px;          /* ⬅ giảm từ 260px */
+    overflow: hidden;
+}
+
+/* Đẩy nội dung lên trên thay vì center */
+.featured-item {
+    justify-content: flex-start;
+    padding-top: 6px;
+}
+
+/* Giảm khoảng cách ảnh */
+.featured-item img {
+    margin-bottom: 6px;
+}
+
+/* Giảm khoảng cách tên */
+.featured-info .name {
+    margin-bottom: 2px;
+    line-height: 1.3;
+}
+
+/* Không cho giá tạo khoảng trống */
+.featured-info .price {
+    margin-bottom: 0;
+}
+
+/* Gọn padding toàn khối */
+.featured-box {
+    padding: 12px;
+}
+
+.featured-info .name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.3;
+
+    white-space: nowrap;       
+    overflow: hidden;
+    text-overflow: ellipsis;    
+}
+
+
+
+
+/* ===== NỀN HAI BÊN ===== */
+.side-bg {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    width: auto;
+    background: linear-gradient(
+        180deg,
+        #f6e9cc,
+        #f6f3f6 40%,
+        #f1e1bd
+    );
+    z-index: 0;
+    pointer-events: none;
+}
+
+.side-bg.left {
+    left: 0;
+    right: calc(50% + 570px);
+}
+
+.side-bg.right {
+    right: 0;
+    left: calc(50% + 570px);
+}
+
+/* Mobile: tắt */
+@media (max-width: 1200px) {
+    .side-bg {
+        display: none;
+    }
+}
+
+/* ================= TẾT FALLING ITEMS – SAFE ================= */
+
+.tet-side {
+    position: fixed;
+    top: 70px;
+    bottom: 0;
+    width: auto;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.tet-side.left {
+    left: 0;
+    right: calc(50% + 570px);
+}
+
+.tet-side.right {
+    right: 0;
+    left: calc(50% + 570px);
+}
+
+/* Item rơi */
+.tet-fall {
+    position: absolute;
+    top: -40px;
+    font-size: 22px;
+    opacity: 0.85;
+    animation: tet-fall linear infinite;
+}
+
+@keyframes tet-fall {
+    to {
+        transform: translateY(120vh) rotate(360deg);
+    }
+}
+
+/* Tắt mobile */
+@media (max-width: 1200px) {
+    .tet-side {
+        display: none;
+    }
+}
+footer {
+    width: 100%;
+    background: #ffffff;
+    padding: 20px 0;
+    border-top: 1px solid #eee;
+    text-align: center;
+    position: relative;
+    z-index: 2;
+}
+
+/* ❗ Không cho lớp trang trí chặn click */
+.side-bg,
+.tet-side {
+    pointer-events: none !important;
+}
+
+/* Mobile: tắt hoàn toàn mọi ảnh hưởng layout */
+@media (max-width: 768px) {
+    .side-bg,
+    .tet-side {
+        display: none !important;
+    }
+}
+
+</style>
+
+</head>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const items = document.querySelectorAll(".featured-item");
+    if (!items.length) return;
+
+    let index = 0;
+
+    setInterval(() => {
+        items[index].classList.remove("active");
+        index = (index + 1) % items.length;
+        items[index].classList.add("active");
+    }, 3500); 
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    const icons = ["🌸", "🧧", "🪙"];
+    const sides = document.querySelectorAll(".tet-side");
+    if (!sides.length) return;
+
+    const FALL_DURATION = 12;        // giây
+    const CREATE_INTERVAL = 700;
+    const STORAGE_KEY = "tet_fall_start_time";
+
+    let startTime = localStorage.getItem(STORAGE_KEY);
+    if (!startTime) {
+        startTime = Date.now();
+        localStorage.setItem(STORAGE_KEY, startTime);
+    }
+
+    function createFall(side) {
+        const el = document.createElement("span");
+        el.className = "tet-fall";
+        el.innerText = icons[Math.floor(Math.random() * icons.length)];
+
+        // 🎯 RANDOM THẬT
+        const size = Math.random() * 10 + 18;
+        const left = Math.random() * 100;
+        const opacity = Math.random() * 0.4 + 0.6;
+        const personalOffset = Math.random() * FALL_DURATION;
+
+        el.style.fontSize = size + "px";
+        el.style.left = left + "%";
+        el.style.opacity = opacity;
+        el.style.animationDuration = FALL_DURATION + "s";
+
+        // ⏱ delay âm + offset riêng → không tụ
+        const elapsed = ((Date.now() - startTime) / 1000) % FALL_DURATION;
+        el.style.animationDelay = `-${(elapsed + personalOffset)}s`;
+
+        side.appendChild(el);
+
+        setTimeout(() => el.remove(), FALL_DURATION * 1000);
+    }
+
+    sides.forEach(side => {
+        setInterval(() => createFall(side), CREATE_INTERVAL);
+    });
+});
+
+document.querySelectorAll(".toast-msg").forEach(toast => {
+    setTimeout(() => {
+        toast.remove();
+    }, 3800); // khớp animation
+});
+</script>
+<body>
+<!-- SIDE BACKGROUND -->
+<div class="side-bg left"></div>
+<div class="side-bg right"></div>
+
+<!-- Tet decor -->
+<div class="tet-side left"></div>
+<div class="tet-side right"></div>
+
+
+<div class="toast-container">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="toast-msg 
+                {% if message.tags == 'success' %}toast-success
+                {% elif message.tags == 'error' %}toast-error
+                {% elif message.tags == 'warning' %}toast-warning
+                {% else %}toast-info{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+<!-- HEADER TOP -->
+<div class="topbar">
+    <div class="container d-flex align-items-center justify-content-between">
+
+        <!-- Logo -->
+        <a href="{% url 'store_product_list' %}" class="text-decoration-none">
+            <img src="{% static 'images/logo2.png' %}" 
+                alt="BuyStore Logo" 
+                class="logo-img">
+        </a>
+
+        <!-- Ô tìm kiếm -->
+        <form method="GET" action="{% url 'store_product_list' %}" class="search-box d-flex" style="max-width:450px; width:100%">
+            <div class="search-wrapper" style="max-width:450px; width:100%; position:relative;">
+                <input 
+                    type="text" 
+                    name="q"
+                    class="form-control search-input"
+                    placeholder="Bạn tìm gì hôm nay?"
+                    value="{{ query }}"
+                    style="padding-right:45px;"
+                >
+
+                <button type="submit" class="search-btn">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+        </form>
+
+        <div class="d-flex align-items-center text-white">
+
+            <!-- Giỏ hàng -->
+            <a href="{% url 'store_cart' %}" class="text-white text-decoration-none me-4">
+                <i class="bi bi-cart3 fs-4"></i>
+            </a>
+
+            {% if request.user.is_authenticated %}
+                <a href="{% url 'store_order_history' %}" 
+                class="btn btn-outline-light me-2 order-btn">
+                    <i class="bi bi-receipt"></i>
+                </a>
+
+                <span class="me-3">
+                    Xin chào, {{ request.user.ten|default:request.user.username }}
+                </span>
+
+                <a href="{% url 'logout_cus' %}" class="btn btn-outline-light">
+                    Đăng xuất
+                </a>
+            {% else %}
+
+                <!-- Chưa đăng nhập -->
+                <a href="{% url 'login_cus' %}" class="btn btn-outline-light ms-2">
+                    Đăng nhập
+                </a>
+
+                <a href="{% url 'register_cus' %}" class="btn btn-light text-dark ms-2">
+                    Đăng ký
+                </a>
+            {% endif %}
+
+        </div>
+
+    </div>
+</div>
+
+<div class="container main-layout mt-3">
+
+    <div class="left-sidebar-fixed">
+
+        <!-- DANH MỤC -->
+        <div class="category-box">
+            <div class="category-title">
+                <i class="bi bi-list"></i> Danh mục sản phẩm
+            </div>
+            <ul class="category-list">
+                <li onclick="location.href='{% url 'store_category' 1 %}'">
+                    <i class="bi bi-phone"></i> Điện thoại
+                </li>
+                <li onclick="location.href='{% url 'store_category' 2 %}'">
+                    <i class="bi bi-laptop"></i> Laptop
+                </li>
+                <li onclick="location.href='{% url 'store_category' 3 %}'">
+                    <i class="bi bi-usb-symbol"></i> Phụ kiện
+                </li>
+                <li onclick="location.href='{% url 'store_category' 4 %}'">
+                    <i class="bi bi-smartwatch"></i> Đồng hồ
+                </li>
+            </ul>
+        </div>
+        <div class="featured-box featured-left">
+            <h5 class="featured-title">🔥 Bán chạy</h5>
+
+            <div class="featured-slider">
+                {% for sp in best_sellers %}
+                <a href="{% url 'store_product_detail' sp.ma_san_pham %}"
+                class="featured-item {% if forloop.first %}active{% endif %}">
+                    <img src="{{ sp.hinh_anh.url }}">
+                    <div class="featured-info">
+                        <div class="name">{{ sp.ten_san_pham }}</div>
+                        <div class="price">{{ sp.gia|floatformat:0|intcomma }}đ</div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+
+
+    </div>
+    
+
+    <!-- MAIN CONTENT -->
+      <div class="content-area">
+        {% block content %}
+        {% endblock %}
+
+</div>
+    </div>
+<footer>
+    <div class="container">
+        © 2025 BuyStoreTPK - Quốc Gia: Việt Nam
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

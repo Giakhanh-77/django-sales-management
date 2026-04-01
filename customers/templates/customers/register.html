@@ -1,0 +1,153 @@
+<!doctype html>
+<html>
+<head>
+    <title>Đăng ký</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f6fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .register-container {
+            background: #fff;
+            padding: 22px 26px;
+            width: 360px;
+            border-radius: 10px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+            border: 1px solid #e0e0e0;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 18px;
+            font-size: 20px;
+            color: #2d3436;
+        }
+
+        label {
+            font-weight: 600;
+            font-size: 14px;
+            color: #2d3436;
+        }
+
+        /* INPUT + TEXTAREA GỌN */
+        input,
+        textarea {
+            width: 100%;
+            padding: 7px 10px;
+            margin-top: 4px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: Arial, sans-serif;
+            height: 36px;
+            box-sizing: border-box;
+        }
+
+        /* textarea vẫn gọn như input */
+        textarea {
+            resize: none;
+        }
+
+        /* NÚT ĐĂNG KÝ */
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #0984e3;
+            color: white;
+            border: none;
+            font-size: 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 6px;
+        }
+
+        button:hover {
+            background: #0873c8;
+        }
+
+        /* LỖI */
+        .error-list {
+            color: #d63031;
+            margin-bottom: 12px;
+            font-size: 13px;
+        }
+
+        /* LINK */
+        .register-link {
+            text-align: center;
+            margin-top: 12px;
+            font-size: 14px;
+        }
+
+        .register-link a {
+            color: #0984e3;
+            text-decoration: none;
+        }
+
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+
+    </style>
+</head>
+
+<body>
+<div class="register-container">
+    <h1>Đăng ký khách hàng</h1>
+
+    <!-- HIỂN THỊ LỖI -->
+    {% if form.errors %}
+        <ul class="error-list">
+            {% for field in form %}
+                {% for error in field.errors %}
+                    <li>{{ field.label }}: {{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        <label>Họ tên:</label>
+        {{ form.ten }}
+
+        <label>Số điện thoại:</label>
+        {{ form.sdt }}
+
+        <label>Username:</label>
+        {{ form.username }}
+
+        <label>Email:</label>
+        {{ form.email }}
+
+        <label>Địa chỉ:</label>
+        {{ form.dia_chi }}
+
+        <label>Mật khẩu:</label>
+        {{ form.password1 }}
+
+        <label>Nhập lại mật khẩu:</label>
+        {{ form.password2 }}
+
+        <button type="submit">Đăng ký</button>
+    </form>
+
+    <div class="register-link">
+        Đã có tài khoản?
+        <a href="{% url 'login_cus' %}">Đăng nhập</a>
+    </div>
+</div>
+</body>
+</html>
