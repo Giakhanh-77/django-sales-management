@@ -1,0 +1,783 @@
+{% extends 'home.html' %}
+{% block dashboard_content %}
+{% load humanize %}
+
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-success" style="margin-bottom:15px;">
+      {{ message }}
+    </div>
+  {% endfor %}
+{% endif %}
+<div class="product-page">
+    <h2 class="page-title">
+        <i class="bi bi-box-seam me-2"></i>Quản lý sản phẩm
+    </h2>
+
+    <div class="toolbar">
+        <form method="get" action="{% url 'product_list' %}" class="search-form">
+            <input type="text" name="q" placeholder="Tìm kiếm sản phẩm..." value="{{ request.GET.q }}">
+
+            <select name="danh_muc">
+                <option value="">-- Tất cả danh mục --</option>
+                {% for dm in danh_muc_list %}
+                <option value="{{ dm.id }}" {% if request.GET.danh_muc == dm.id|stringformat:"s" %}selected{% endif %}>
+                    {{ dm.ten_danh_muc }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <button type="submit">
+                <i class="bi bi-search me-1"></i>Tìm kiếm
+            </button>
+
+            <button type="button" class="btn-add" id="btnAddProduct" data-url="{% url 'product_add' %}">
+                <i class="bi bi-plus-circle me-1"></i>Thêm sản phẩm
+            </button>
+        </form>
+    </div>
+
+    {% if san_pham_list %}
+    <div class="table-wrapper">
+        <div class="table-responsive">
+            <table class="product-table">
+                <thead>
+                    <tr>
+                        <th>Hình ảnh</th>
+                        <th>Mã SP</th>
+                        <th>Tên sản phẩm</th>
+                        <th>Giá (VNĐ)</th>
+                        <th>Số lượng tồn</th>
+                        <th>Danh mục</th>
+                        <th>Mô tả</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sp in san_pham_list %}
+                    <tr>
+                        <td>
+                            {% if sp.hinh_anh %}
+                                <img src="{{ sp.hinh_anh.url }}" alt="{{ sp.ten_san_pham }}">
+                            {% else %}
+                                <span style="color:#888;">(Không có ảnh)</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ sp.ma_san_pham }}</td>
+                        <td>{{ sp.ten_san_pham }}</td>
+                        <td>{{ sp.gia|floatformat:0|intcomma }}đ</td>
+                        <td>{{ sp.so_luong_ton }}</td>
+                        <td>{{ sp.danh_muc.ten_danh_muc }}</td>
+                        <td>{{ sp.mo_ta|truncatewords:10 }}</td>
+                        <td class="actions">
+                            {% if sp.id %}
+                                <button class="btn-edit" data-url="{% url 'product_edit' sp.id %}" title="Sửa">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                            {% endif %}
+                            <button class="btn-delete"
+                                    data-name="{{ sp.ten_san_pham }}"
+                                    data-url="{% url 'product_delete' sp.id %}"
+                                    title="Xóa">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+        <p class="no-data">Không có sản phẩm nào được tìm thấy.</p>
+    {% endif %}
+</div>
+
+<!-- ===== MODAL FORM THÊM / SỬA ===== -->
+<div id="productFormModal" class="modal-overlay">
+    <div class="modal-box" style="max-width:600px;">
+        <h3 id="formTitle">
+            <i class="bi bi-clipboard-check me-2"></i>Thêm / Sửa sản phẩm
+        </h3>
+
+        <form method="POST" enctype="multipart/form-data" id="productForm">
+            {% csrf_token %}
+            <div id="formFields">{{ form.as_p }}</div>
+
+            <div class="modal-buttons">
+                <button type="button" class="btn-cancel" id="cancelForm">
+                    <i class="bi bi-x-circle me-1"></i>Hủy
+                </button>
+                <button type="submit" class="btn-save">
+                    <i class="bi bi-save me-1"></i>Lưu
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ===== MODAL XÁC NHẬN XOÁ ===== -->
+<div id="confirmDeleteModal" class="modal-overlay">
+    <div class="modal-box">
+        <h3>
+            <i class="bi bi-exclamation-triangle text-danger me-2"></i>Xác nhận xóa
+        </h3>
+
+        <p>
+            Bạn có chắc chắn muốn xóa sản phẩm
+            <strong id="deleteProductName"></strong> không?
+        </p>
+
+        <form method="POST" id="deleteForm">
+            {% csrf_token %}
+            <div class="modal-buttons">
+                <button type="button" class="btn-cancel" id="cancelDelete">
+                    <i class="bi bi-arrow-left-circle me-1"></i>Hủy
+                </button>
+                <button type="submit" class="btn-delete-confirm">
+                    <i class="bi bi-trash me-1"></i>Xóa
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<style>
+/* ===== BỐ CỤC TRANG ===== */
+.product-page {
+    padding: 20px 30px;
+    background: #f8f9fc;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    min-height: calc(100vh - 160px);
+    display: flex;
+    flex-direction: column;
+}
+
+/* ===== TIÊU ĐỀ ===== */
+.page-title {
+    text-align: center;
+    color: #3c80ff;
+    margin-bottom: 25px;
+    font-weight: 600;
+}
+
+/* ===== THANH CÔNG CỤ ===== */
+.toolbar {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+.search-form {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.search-form input[type="text"],
+.search-form select {
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 0.95rem;
+}
+
+.search-form button {
+    background-color: #14213d;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-add {
+    background-color: #28a745;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-weight: bold;
+    border: none;
+}
+.btn-add:hover { background-color: #218838; }
+
+/* ===== KHUNG BẢNG ===== */
+.table-wrapper {
+    flex: 1;
+    border-radius: 10px;
+    background: white;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* ✅ Thanh cuộn ngang cho bảng */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 10px;
+}
+.table-responsive::-webkit-scrollbar {
+    height: 8px;
+}
+.table-responsive::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 10px;
+}
+.table-responsive::-webkit-scrollbar-thumb:hover {
+    background: #999;
+}
+
+/* ===== BẢNG ===== */
+.product-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 950px;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.product-table th {
+    background-color: #14213d;
+    color: white;
+    padding: 10px;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.product-table td {
+    padding: 10px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+.product-table td:nth-child(3),
+.product-table td:nth-child(7) {
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+
+/* ===== HÌNH ẢNH ===== */
+.product-table img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+/* ===== HÀNH ĐỘNG ===== */
+.actions button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+}
+.btn-edit { color: #ffc107; }
+.btn-delete { color: #dc3545; }
+.btn-edit:hover { color: #e0a800; transform: scale(1.1); }
+.btn-delete:hover { color: #c82333; transform: scale(1.1); transition: 0.2s; }
+
+/* ===== KHÔNG CÓ DỮ LIỆU ===== */
+.no-data {
+    text-align: center;
+    margin-top: 20px;
+    color: #666;
+}
+
+/* ===== MODAL ===== */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+}
+
+.modal-box {
+    background: white;
+    padding: 20px 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    text-align: center;
+    width: 90%;
+    max-width: 500px;
+}
+
+.modal-buttons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.btn-cancel, .btn-save, .btn-delete-confirm {
+    border: none;
+    border-radius: 6px;
+    padding: 8px 14px;
+    color: white;
+    cursor: pointer;
+}
+.btn-cancel { background: #6c757d; }
+.btn-save { background: #28a745; }
+.btn-delete-confirm { background: #dc3545; }
+.btn-cancel:hover { background: #5a6268; }
+.btn-save:hover { background: #218838; }
+.btn-delete-confirm:hover { background: #c82333; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 992px) {
+    .search-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-form input,
+    .search-form select,
+    .search-form button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .product-page {
+        padding: 15px;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .product-table {
+        min-width: 800px;
+    }
+
+    .page-title {
+        font-size: 1.3rem;
+    }
+}
+.table-wrapper,
+.table-responsive {
+    overflow-x: auto !important;
+    display: block !important;
+    width: 100%;
+}
+
+.dashboard-content,
+main,
+section {
+    overflow-x: visible !important;  
+}
+
+
+html, body {
+    overflow-x: auto !important;
+}
+
+/* ===== OVERLAY ===== */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    backdrop-filter: blur(3px);
+}
+
+/* ===== FORM BOX ===== */
+.modal-box {
+    background: #ffffff;
+    padding: 28px 32px;
+    border-radius: 14px;
+    width: 95%;
+    max-width: 520px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    animation: fadeUp 0.25s ease-out;
+}
+
+/* Animation mở modal */
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== TIÊU ĐỀ FORM ===== */
+#formTitle {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #3c80ff;
+    text-align: center;
+    margin-bottom: 18px;
+}
+
+/* ===== FORM INPUT ===== */
+#productForm p {
+    margin: 12px 0;
+    text-align: left;
+}
+
+#productForm label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+#productForm input,
+#productForm select,
+#productForm textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ccd2dc;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    background: #fafbff;
+    transition: border 0.2s, box-shadow 0.2s;
+}
+
+/* Hover & Focus đẹp */
+#productForm input:focus,
+#productForm select:focus,
+#productForm textarea:focus {
+    border-color: #3c80ff;
+    box-shadow: 0 0 0 3px rgba(60,128,255,0.15);
+    outline: none;
+}
+
+/* Ô mô tả */
+#productForm textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* File input */
+#productForm input[type="file"] {
+    padding: 6px;
+    background: #fff;
+}
+
+/* ===== NÚT ===== */
+.modal-buttons {
+    margin-top: 22px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.btn-cancel, .btn-save {
+    padding: 10px 18px;
+    font-size: 0.95rem;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.25s;
+}
+
+.btn-cancel {
+    background: #6c757d;
+    color: white;
+}
+.btn-cancel:hover {
+    background: #565e64;
+}
+
+.btn-save {
+    background: #28a745;
+    color: white;
+}
+.btn-save:hover {
+    background: #208838;
+}
+
+
+
+/* ===== MOBILE ===== */
+@media (max-width: 480px) {
+    .modal-box {
+        padding: 22px;
+    }
+
+    #formTitle {
+        font-size: 1.3rem;
+    }
+}
+.modal-box {
+    max-height: 85vh;   /* Không chiếm hết màn hình */
+    overflow-y: auto;   /* Cho phép cuộn nếu cần */
+    padding: 24px 28px;
+}
+
+/* Giảm khoảng cách thẻ p mà form Django sinh ra */
+#productForm p {
+    margin: 8px 0 !important;
+}
+
+/* Chia form thành 2 cột */
+#formFields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px 20px;
+}
+
+/* Các ô dài cần full-width */
+#productForm textarea,
+#productForm select,
+#productForm input[type="file"] {
+    grid-column: span 2; /* chiếm hết 2 cột */
+}
+
+/* Nhãn gần hơn, ít khoảng trắng */
+#productForm label {
+    margin-bottom: 4px;
+}
+
+/* Input gọn hơn */
+#productForm input,
+#productForm select,
+#productForm textarea {
+    padding: 8px 10px;
+    font-size: 0.9rem;
+}
+
+/* Nút nằm full-width dưới cùng */
+.modal-buttons {
+    grid-column: span 2;
+    margin-top: 15px;
+}
+
+
+/* =======================
+   MOBILE – TABLE GỌN
+   CHỈ HIỂN THỊ CỘT CẦN THIẾT
+======================= */
+@media (max-width: 768px) {
+
+    /* Toolbar giữ gọn */
+    .search-form {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .search-form input,
+    .search-form select,
+    .search-form button {
+        width: 100%;
+        font-size: 0.9rem;
+    }
+
+    .btn-add {
+        width: 100%;
+        text-align: center;
+    }
+
+    /* ===== TABLE ===== */
+    .table-responsive {
+        overflow-x: hidden;
+    }
+
+    .product-table {
+        min-width: unset;
+        font-size: 0.9rem;
+    }
+
+    .product-table th,
+    .product-table td {
+        padding: 8px 6px;
+        text-align: center;
+    }
+
+    /* ===== ẨN CỘT KHÔNG CẦN ===== */
+    /* Số lượng tồn */
+    .product-table th:nth-child(5),
+    .product-table td:nth-child(5),
+
+    /* Danh mục */
+    .product-table th:nth-child(6),
+    .product-table td:nth-child(6),
+
+    /* Mô tả */
+    .product-table th:nth-child(7),
+    .product-table td:nth-child(7) {
+        display: none;
+    }
+
+    /* ===== ẢNH ===== */
+    .product-table img {
+        width: 55px;
+        height: 55px;
+        border-radius: 8px;
+    }
+
+    /* ===== TÊN SẢN PHẨM ===== */
+    .product-table td:nth-child(3) {
+        white-space: normal;
+        font-weight: 500;
+    }
+
+    /* ===== GIÁ ===== */
+    .product-table td:nth-child(4) {
+        font-weight: 600;
+        color: #3c80ff;
+    }
+
+    /* ===== HÀNH ĐỘNG ===== */
+    .actions {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+    }
+
+    .actions button {
+        font-size: 1.1rem;
+    }
+}
+
+/* MOBILE RẤT NHỎ */
+@media (max-width: 480px) {
+
+    .page-title {
+        font-size: 1.2rem;
+    }
+
+    .product-table img {
+        width: 48px;
+        height: 48px;
+    }
+
+    .actions button {
+        font-size: 1rem;
+    }
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const formModal = document.getElementById("productFormModal");
+  const formTitle = document.getElementById("formTitle");
+  const productForm = document.getElementById("productForm");
+  const cancelForm = document.getElementById("cancelForm");
+
+  const deleteModal = document.getElementById("confirmDeleteModal");
+  const deleteName = document.getElementById("deleteProductName");
+  const deleteForm = document.getElementById("deleteForm");
+  const cancelDelete = document.getElementById("cancelDelete");
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+      const cookies = document.cookie.split(";");
+      for (let cookie of cookies) {
+        cookie = cookie.trim();
+        if (cookie.startsWith(name + "=")) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+  const csrftoken = getCookie("csrftoken");
+
+
+  document.getElementById("btnAddProduct").addEventListener("click", () => {
+    const addUrl = document.getElementById("btnAddProduct").dataset.url;
+    productForm.reset();
+    productForm.action = addUrl;
+    formTitle.textContent = "Thêm sản phẩm";
+    formModal.style.display = "flex";
+  });
+
+
+  document.querySelectorAll(".btn-edit").forEach(btn => {
+    btn.addEventListener("click", async (e) => {
+      e.preventDefault();
+      const editUrl = btn.dataset.url;
+      const id = editUrl.split("/").filter(Boolean).pop();
+
+      try {
+        const res = await fetch(`/api/products/sanpham/${id}/`);
+        if (!res.ok) throw new Error("Không tải được dữ liệu!");
+
+        const data = await res.json();
+
+        document.querySelector('[name="ma_san_pham"]').value = data.ma_san_pham || "";
+        document.querySelector('[name="ten_san_pham"]').value = data.ten_san_pham || "";
+        document.querySelector('[name="gia"]').value = data.gia || "";
+        document.querySelector('[name="so_luong_ton"]').value = data.so_luong_ton || "";
+        document.querySelector('[name="mo_ta"]').value = data.mo_ta || "";
+        if (data.danh_muc) document.querySelector('[name="danh_muc"]').value = data.danh_muc;
+
+        productForm.action = editUrl;
+        formTitle.textContent = "Sửa sản phẩm";
+        formModal.style.display = "flex";
+      } catch (error) {
+        alert("❌ Lỗi khi tải thông tin sản phẩm!");
+        console.error(error);
+      }
+    });
+  });
+
+  
+  cancelForm.addEventListener("click", () => formModal.style.display = "none");
+  formModal.addEventListener("click", (e) => {
+    if (e.target === formModal) formModal.style.display = "none";
+  });
+
+
+  document.querySelectorAll(".btn-delete").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      deleteName.textContent = btn.dataset.name;
+      deleteForm.action = btn.dataset.url;
+      deleteModal.style.display = "flex";
+    });
+  });
+
+
+  deleteForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    fetch(deleteForm.action, {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": csrftoken
+      }
+    })
+    .then((res) => {
+      if (!res.ok) {
+        alert("❌ Không thể xóa sản phẩm!");
+        return;
+      }
+      window.location.reload();
+    })
+    .catch(err => {
+      alert("❌ Lỗi kết nối khi xoá!");
+      console.error(err);
+    });
+  });
+
+  cancelDelete.addEventListener("click", () => deleteModal.style.display = "none");
+  deleteModal.addEventListener("click", (e) => {
+    if (e.target === deleteModal) deleteModal.style.display = "none";
+  });
+});
+
+setTimeout(() => {
+    document.querySelectorAll('.alert').forEach(el => el.remove());
+  }, 2000);
+</script>
+
+{% endblock dashboard_content %}

@@ -1,0 +1,740 @@
+{% extends 'base.html' %}
+{% block dashboard_content %}
+
+<head>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<style>
+  /* ===============================
+   RESPONSIVE – BẢNG ĐƠN HÀNG
+   CSS ONLY – KHÔNG ẢNH HƯỞNG DESKTOP
+   =============================== */
+@media (max-width: 768px) {
+
+  /* ❌ Không scroll ngang */
+  .table-responsive {
+    overflow-x: visible;
+  }
+
+  #bangDonHang {
+    width: 100%;
+    min-width: 100%;
+  }
+
+  /* ===== ẨN CỘT KHÔNG CẦN ===== */
+  /* Ngày đặt */
+  #bangDonHang th:nth-child(3),
+  #bangDonHang td:nth-child(3) {
+    display: none;
+  }
+
+  /* ===== CHỈNH CỘT CÒN LẠI ===== */
+  #bangDonHang th,
+  #bangDonHang td {
+    font-size: 0.85rem;
+    padding: 8px 6px;
+    white-space: nowrap;
+  }
+
+  /* Tên khách hàng nổi bật */
+  #bangDonHang td:nth-child(2) {
+    font-weight: 600;
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Tổng tiền */
+  #bangDonHang td:nth-child(4) {
+    font-weight: 600;
+    color: #dc3545;
+  }
+
+  /* Trạng thái select gọn */
+  #bangDonHang select {
+    font-size: 0.8rem;
+    padding: 4px;
+  }
+
+  /* Nút chi tiết */
+  #bangDonHang td:last-child {
+    display: flex;
+    justify-content: center;
+  }
+
+  #bangDonHang .btn {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+  }
+}
+
+/* ===============================
+   MOBILE – BẢNG ĐƠN HÀNG GỌN GÀNG
+   CHỈ ID | KHÁCH | TRẠNG THÁI | CHI TIẾT
+   =============================== */
+@media (max-width: 768px) {
+
+  /* Không scroll ngang */
+  .table-responsive {
+    overflow-x: visible;
+  }
+
+  #bangDonHang {
+    width: 100%;
+    min-width: 100%;
+  }
+
+  /* Ẩn tất cả cột KHÔNG CẦN */
+  #bangDonHang th:nth-child(3),
+  #bangDonHang td:nth-child(3),
+  #bangDonHang th:nth-child(4),
+  #bangDonHang td:nth-child(4) {
+    display: none;
+  }
+
+  /* Font nhỏ, gọn */
+  #bangDonHang th,
+  #bangDonHang td {
+    font-size: 0.85rem;
+    padding: 8px 6px;
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+
+  /* ID nhỏ */
+  #bangDonHang td:nth-child(1) {
+    font-weight: 500;
+    color: #555;
+    width: 60px;
+  }
+
+  /* Tên khách hàng */
+  #bangDonHang td:nth-child(2) {
+    font-weight: 600;
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Trạng thái select gọn */
+  #bangDonHang select {
+    font-size: 0.8rem;
+    padding: 4px 6px;
+    min-width: 90px;
+  }
+
+  /* Nút chi tiết */
+  #bangDonHang td:last-child {
+    text-align: center;
+  }
+
+  #bangDonHang .btn {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+  }
+}
+
+/* Tạo đơn hàng */
+#createOrder,
+#taoDonHang,
+.create-order,
+.order-form {
+    display: none !important;
+}
+
+/* Lịch sử giao dịch */
+#lichSuGiaoDich,
+#orderHistory,
+.transaction-history,
+.order-history {
+    display: none !important;
+}
+
+/* Thu nhỏ khung modal */
+#modalChiTiet .modal-dialog {
+    max-width: 600px;
+}
+
+/* Header gọn hơn */
+#modalChiTiet .modal-header {
+    padding: 10px 16px;
+}
+
+#modalChiTiet .modal-title {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+/* Body gọn */
+#modalChiTiet .modal-body {
+    padding: 14px 16px;
+}
+
+/* Label nhỏ lại */
+#modalChiTiet .form-label {
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+}
+
+/* Input & select gọn */
+#modalChiTiet .form-control,
+#modalChiTiet .form-select {
+    font-size: 0.85rem;
+    padding: 6px 8px;
+}
+
+/* Giảm khoảng cách giữa các field */
+#modalChiTiet .row.g-3 {
+    --bs-gutter-y: 0.6rem;
+}
+
+/* Footer gọn */
+#modalChiTiet .modal-footer {
+    padding: 10px 16px;
+}
+
+#modalChiTiet .modal-footer .btn {
+    font-size: 0.85rem;
+    padding: 6px 12px;
+}
+
+/* ===============================
+   MOBILE – KHÔNG TRÀN, KHÔNG KHUẤT
+   =============================== */
+@media (max-width: 576px) {
+    #modalChiTiet .modal-dialog {
+        max-width: 95%;
+        margin: 10px auto;
+    }
+
+    #modalChiTiet .modal-title {
+        font-size: 0.95rem;
+    }
+}
+</style>
+
+<div class="container mt-4">
+  <h2 class="mb-4">
+    <i class="bi bi-receipt-cutoff me-2 text-primary"></i>
+    Quản lý Đơn hàng
+  </h2>
+
+  <div class="card p-4 shadow-sm border-0 mb-4">
+    <h4 class="fw-bold mb-3 text-primary">
+      <i class="bi bi-plus-circle-fill me-2"></i>
+      Tạo Đơn Hàng Mới
+    </h4>
+
+    <form id="formTaoDonHang" class="row g-4 align-items-end">
+      <div class="col-md-4">
+        <label for="khach_hang" class="form-label fw-semibold">
+          <i class="bi bi-person-fill me-1"></i>
+          Khách hàng
+        </label>
+        <select id="khach_hang" class="form-select form-select-lg border-primary" required></select>
+      </div>
+
+      <div class="col-md-4">
+        <label for="san_pham" class="form-label fw-semibold">
+          <i class="bi bi-box-seam-fill me-1"></i>
+          Sản phẩm
+        </label>
+        <select id="san_pham" class="form-select form-select-lg border-primary" required></select>
+      </div>
+
+      <div class="col-md-2">
+        <label for="so_luong" class="form-label fw-semibold">
+          <i class="bi bi-hash me-1"></i>
+          Số lượng
+        </label>
+        <input type="number"
+               id="so_luong"
+               class="form-control form-control-lg text-center border-primary"
+               value="1" min="1" required>
+      </div>
+
+      <div class="col-md-3">
+        <label for="gia" class="form-label fw-semibold">
+          <i class="bi bi-cash-coin me-1"></i>
+          Giá sản phẩm
+        </label>
+        <div class="input-group input-group-lg">
+          <input type="text" id="gia" class="form-control text-end" placeholder="0" readonly>
+          <span class="input-group-text bg-light">đ</span>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <label for="tong_tien" class="form-label fw-semibold">
+          <i class="bi bi-receipt me-1"></i>
+          Tổng tiền
+        </label>
+        <div class="input-group input-group-lg">
+          <input type="text"
+                 id="tong_tien"
+                 class="form-control text-end fw-bold text-danger"
+                 value="0" readonly>
+          <span class="input-group-text bg-light">đ</span>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <label for="trang_thai" class="form-label fw-semibold">
+          <i class="bi bi-traffic-cone me-1"></i>
+          Trạng thái
+        </label>
+        <select id="trang_thai" class="form-select form-select-lg">
+          <option value="CHO">Chờ xử lý</option>
+          <option value="DANG">Đang giao</option>
+          <option value="DA">Đã giao</option>
+          <option value="HUY">Đã hủy</option>
+        </select>
+      </div>
+
+      <div class="col-md-3 d-flex align-items-end justify-content-end">
+        <button type="submit" class="btn btn-lg btn-success w-100 shadow-sm">
+          <i class="bi bi-save-fill me-1"></i>
+          Tạo đơn hàng
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="d-flex justify-content-end mt-3">
+    <button class="btn btn-outline-secondary shadow-sm"
+            data-bs-toggle="offcanvas"
+            data-bs-target="#offcanvasLichSu">
+      <i class="bi bi-clock-history me-1"></i>
+      Xem lịch sử giao dịch
+    </button>
+  </div>
+
+  <div class="offcanvas offcanvas-end w-75" tabindex="-1" id="offcanvasLichSu">
+    <div class="offcanvas-header bg-light border-bottom">
+      <h5 class="offcanvas-title fw-bold">
+        <i class="bi bi-journal-text me-2"></i>
+        Lịch sử giao dịch
+      </h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+      <div class="table-responsive">
+        <table class="table table-striped table-bordered text-center align-middle" id="bangLichSu">
+          <thead class="table-secondary">
+            <tr>
+              <th>Thời gian</th>
+              <th>Đơn hàng</th>
+              <th>Trạng thái cũ</th>
+              <th>Trạng thái mới</th>
+              <th>Ghi chú</th>
+              <th>Người thay đổi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="6" class="text-muted">
+                Đang tải...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm mt-4">
+    <div class="card-body">
+      <h5>
+        <i class="bi bi-list-check me-2"></i>
+        Danh sách Đơn hàng
+      </h5>
+      <table class="table table-striped table-bordered mt-3 text-center" id="bangDonHang">
+        <thead class="table-dark">
+          <tr>
+            <th>ID</th>
+            <th>Khách hàng</th>
+            <th>Ngày đặt</th>
+            <th>Tổng tiền</th>
+            <th>Trạng thái</th>
+            <th>Thao tác</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer"></div>
+
+<div class="modal fade" id="modalChiTiet" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content shadow-lg border-info">
+      <div class="modal-header bg-info text-white">
+        <h5 class="modal-title">
+          <i class="bi bi-file-earmark-text-fill me-2"></i>
+          Chi tiết đơn hàng <span id="modalOrderId"></span>
+        </h5>
+        <button type="button"
+                class="btn-close btn-close-white"
+                data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <form id="formChiTietDonHang" class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">
+              <i class="bi bi-person me-1"></i>
+              Khách hàng
+            </label>
+            <input type="text" id="ct_khach_hang" class="form-control" readonly>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">
+              <i class="bi bi-calendar-event me-1"></i>
+              Ngày đặt
+            </label>
+            <input type="text" id="ct_ngay_dat" class="form-control" readonly>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">
+              <i class="bi bi-box-seam me-1"></i>
+              Sản phẩm
+            </label>
+            <input type="text" id="ct_san_pham" class="form-control" readonly>
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">
+              <i class="bi bi-hash me-1"></i>
+              Số lượng
+            </label>
+            <input type="number" id="ct_so_luong" class="form-control" min="1">
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">
+              <i class="bi bi-cash-stack me-1"></i>
+              Tổng tiền
+            </label>
+            <input type="text" id="ct_tong_tien" class="form-control text-end" readonly>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">
+              <i class="bi bi-traffic-cone me-1"></i>
+              Trạng thái
+            </label>
+            <select id="ct_trang_thai" class="form-select">
+              <option value="CHO">Chờ xử lý</option>
+              <option value="DANG">Đang giao</option>
+              <option value="DA">Đã giao</option>
+              <option value="HUY">Đã hủy</option>
+            </select>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">
+          Đóng
+        </button>
+        <button class="btn btn-success" id="btnLuuChiTiet">
+          <i class="bi bi-save me-1"></i>
+          Lưu thay đổi
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  const API_URL = "/api/orders/donhang/";
+  const KH_URL = "/api/customers/khachhang/";
+  const SP_URL = "/api/products/sanpham/";
+
+  const tableBody = document.querySelector("#bangDonHang tbody");
+  const selectKH = document.querySelector("#khach_hang");
+  const selectSP = document.querySelector("#san_pham");
+  const inputGia = document.querySelector("#gia");
+  const inputSL = document.querySelector("#so_luong");
+  const inputTong = document.querySelector("#tong_tien");
+  const toastContainer = document.querySelector("#toastContainer");
+  let currentDeleteId = null;
+  let sanPhamData = [];
+
+  // --- CSRF TOKEN ---
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            let cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+  }
+  const csrftoken = getCookie('csrftoken');
+
+  // --- Toast thông báo ---
+  function showToast(message, type = "success") {
+    const color = type === "success" ? "bg-success" : type === "error" ? "bg-danger" : "bg-warning";
+    const icon = type === "success" ? "✅" : type === "error" ? "❌" : "⚠️";
+    const toast = document.createElement("div");
+    toast.className = `toast align-items-center text-white ${color} border-0`;
+    toast.innerHTML = `
+      <div class="d-flex">
+        <div class="toast-body">${icon} ${message}</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+      </div>`;
+    toastContainer.appendChild(toast);
+    new bootstrap.Toast(toast, { delay: 3000 }).show();
+  }
+
+  // --- Load khách hàng ---
+  async function loadKhachHang() {
+    const res = await fetch(KH_URL);
+    const data = await res.json();
+    selectKH.innerHTML = `<option value="">-- Chọn khách hàng --</option>`;
+    data.forEach(kh => {
+      selectKH.insertAdjacentHTML("beforeend", `<option value="${kh.id}">${kh.ten}</option>`);
+    });
+  }
+
+  // --- Load sản phẩm ---
+  async function loadSanPham() {
+    const res = await fetch(SP_URL);
+    sanPhamData = await res.json();
+    selectSP.innerHTML = `<option value="">-- Chọn sản phẩm --</option>`;
+    sanPhamData.forEach(sp => {
+      selectSP.insertAdjacentHTML("beforeend", `<option value="${sp.id}">${sp.ten_san_pham}</option>`);
+    });
+  }
+
+  // Khi chọn sản phẩm → hiển thị giá
+  selectSP.addEventListener("change", () => {
+    const id = selectSP.value;
+    const sp = sanPhamData.find(s => s.id == id);
+    if (sp) {
+      inputGia.value = Number(sp.gia).toLocaleString();
+      tinhTong();
+    } else {
+      inputGia.value = "";
+      inputTong.value = "0";
+    }
+  });
+
+  // Tính tổng tiền
+  inputSL.addEventListener("input", tinhTong);
+  function tinhTong() {
+    const id = selectSP.value;
+    const sl = Number(inputSL.value) || 0;
+    const sp = sanPhamData.find(s => s.id == id);
+    const tong = sp ? sp.gia * sl : 0;
+    inputTong.value = tong.toLocaleString();
+  }
+
+  // --- Load danh sách đơn hàng ---
+  async function loadDonHang() {
+    const res = await fetch(API_URL);
+    const data = await res.json();
+    tableBody.innerHTML = "";
+
+    if (data.length === 0) {
+      tableBody.innerHTML = `<tr><td colspan="6">Chưa có đơn hàng nào.</td></tr>`;
+      return;
+    }
+
+    data.forEach(don => {
+      const row = `
+        <tr data-id="${don.id}">
+          <td>${don.id}</td>
+          <td>${don.khach_hang_ten || "Không rõ"}</td>
+          <td>${new Date(don.ngay_dat).toLocaleString()}</td>
+          <td>${Number(don.tong_tien).toLocaleString()} đ</td>
+          <td>
+            <select class="form-select form-select-sm trangThaiSelect" data-id="${don.id}">
+              <option value="CHO" ${don.trang_thai === "CHO" ? "selected" : ""}>Chờ xử lý</option>
+              <option value="DANG" ${don.trang_thai === "DANG" ? "selected" : ""}>Đang giao</option>
+              <option value="DA" ${don.trang_thai === "DA" ? "selected" : ""}>Đã giao</option>
+              <option value="HUY" ${don.trang_thai === "HUY" ? "selected" : ""}>Đã hủy</option>
+            </select>
+          </td>
+          <td>
+            <button class="btn btn-sm btn-outline-info btnChiTiet" data-id="${don.id}">📄 Chi tiết</button>
+          </td>
+        </tr>`;
+      tableBody.insertAdjacentHTML("beforeend", row);
+    });
+
+    attachEvents();
+  }
+
+  // --- Gắn sự kiện động ---
+  function attachEvents() {
+    document.querySelectorAll(".trangThaiSelect").forEach(select => {
+      select.addEventListener("change", async (e) => {
+        const id = e.target.dataset.id;
+        const trang_thai_moi = e.target.value;
+        await capNhatTrangThai(id, trang_thai_moi);
+      });
+    });
+
+    document.querySelectorAll(".btnChiTiet").forEach(btn => {
+      btn.addEventListener("click", async (e) => {
+        const id = e.target.dataset.id;
+        await moChiTietDonHang(id);
+      });
+    });
+  }
+
+  // --- Mở modal Chi tiết đơn hàng ---
+  async function moChiTietDonHang(id) {
+    const res = await fetch(`${API_URL}${id}/`);
+    if (!res.ok) {
+      showToast("❌ Không thể tải chi tiết đơn hàng!", "error");
+      return;
+    }
+
+    const don = await res.json();
+    const chiTiet = don.chi_tiets?.[0];
+
+    document.querySelector("#modalOrderId").textContent = `#${don.id}`;
+    document.querySelector("#ct_khach_hang").value = don.khach_hang_ten || "";
+    document.querySelector("#ct_ngay_dat").value = new Date(don.ngay_dat).toLocaleString();
+    document.querySelector("#ct_san_pham").value = chiTiet ? chiTiet.ten_san_pham : "";
+    document.querySelector("#ct_so_luong").value = chiTiet ? chiTiet.so_luong : 1;
+    document.querySelector("#ct_tong_tien").value = Number(don.tong_tien).toLocaleString();
+    document.querySelector("#ct_trang_thai").value = don.trang_thai || "CHO";
+
+    new bootstrap.Modal(document.getElementById("modalChiTiet")).show();
+
+    document.querySelector("#btnLuuChiTiet").onclick = () => luuChiTietDonHang(id);
+  }
+
+  // --- Lưu chi tiết đơn hàng ---
+  async function luuChiTietDonHang(id) {
+    const san_pham = document.querySelector("#ct_san_pham").value;
+    const so_luong = Number(document.querySelector("#ct_so_luong").value);
+    const trang_thai = document.querySelector("#ct_trang_thai").value;
+    const tong_tien = Number(document.querySelector("#ct_tong_tien").value.replace(/\D/g, ""));
+
+    const res = await fetch(`${API_URL}${id}/`, {
+      method: "PATCH",
+      headers: { 
+        "Content-Type": "application/json",
+        "X-CSRFToken": csrftoken
+      },
+      body: JSON.stringify({ san_pham, so_luong, trang_thai, tong_tien }),
+    });
+
+    if (res.ok) {
+      showToast("✅ Đã cập nhật đơn hàng thành công!");
+      bootstrap.Modal.getInstance(document.querySelector("#modalChiTiet")).hide();
+      await loadDonHang();
+      await loadLichSu();
+    } else {
+      showToast("❌ Lỗi khi lưu đơn hàng!", "error");
+    }
+  }
+
+  // --- Cập nhật trạng thái ---
+  async function capNhatTrangThai(id, trang_thai) {
+    const res = await fetch(`${API_URL}${id}/`, {
+      method: "PATCH",
+      headers: { 
+        "Content-Type": "application/json",
+        "X-CSRFToken": csrftoken
+      },
+      body: JSON.stringify({ trang_thai }),
+    });
+
+    if (res.ok) {
+      showToast(`✅ Cập nhật trạng thái đơn #${id} thành công!`);
+      await loadDonHang();
+      await loadLichSu();
+    } else {
+      showToast("❌ Lỗi khi cập nhật trạng thái!", "error");
+    }
+  }
+
+  // --- Tạo đơn hàng mới ---
+  const API_TAO_DON = "/api/orders/donhang/tao_don_hang_day_du/";
+
+  document.querySelector("#formTaoDonHang").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const khach_hang = selectKH.value;
+    const san_pham = selectSP.value;
+    const so_luong = Number(inputSL.value);
+    const trang_thai = document.querySelector("#trang_thai").value;
+    const tong_tien = Number(inputTong.value.replace(/\D/g, ""));
+
+    if (!khach_hang || !san_pham) {
+      showToast("⚠️ Vui lòng chọn khách hàng và sản phẩm!", "warning");
+      return;
+    }
+
+    const res = await fetch(API_TAO_DON, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "X-CSRFToken": csrftoken
+      },
+      body: JSON.stringify({ khach_hang, san_pham, so_luong, trang_thai, tong_tien }),
+    });
+
+    if (res.ok) {
+      showToast("✅ Đã tạo đơn hàng thành công!");
+      e.target.reset();
+      await loadDonHang();
+      await loadLichSu();
+    } else {
+      const err = await res.json();
+      showToast("❌ Lỗi khi tạo đơn hàng!", "error");
+      console.error(err);
+    }
+  });
+
+  // --- Load lịch sử giao dịch ---
+  async function loadLichSu() {
+    const res = await fetch("/api/orders/lichsugiaodich/");
+    const data = await res.json();
+    const tableBody = document.querySelector("#bangLichSu tbody");
+
+    if (!data.length) {
+      tableBody.innerHTML = `<tr><td colspan="6">Chưa có giao dịch nào.</td></tr>`;
+      return;
+    }
+
+    tableBody.innerHTML = "";
+    data.forEach(item => {
+      const row = `
+        <tr>
+          <td>${new Date(item.thoi_gian).toLocaleString()}</td>
+          <td>#${item.don_hang}</td>
+          <td>${item.trang_thai_cu || "—"}</td>
+          <td>${item.trang_thai_moi}</td>
+          <td>${item.ghi_chu || ""}</td>
+          <td>${item.nguoi_thay_doi || ""}</td>
+        </tr>`;
+      tableBody.insertAdjacentHTML("beforeend", row);
+    });
+  }
+
+  // --- Khởi tạo ---
+  await loadKhachHang();
+  await loadSanPham();
+  await loadDonHang();
+  await loadLichSu();
+});
+</script>
+
+{% endblock %}
