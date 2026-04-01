@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+{% block title %}Đăng ký tài khoản{% endblock %}
+
+{% block register_content %}
+<style>
+    /* Reset layout */
+    .content-wrapper, .main-content, main, .container {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100%;
+        height: 100%;
+    }
+
+    /* Nền gradient giống form đăng nhập */
+    .register-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 100px; /* ✅ Đẩy form xuống dưới */
+    background: linear-gradient(135deg, #a8edea, #fed6e3);
+    font-family: "Poppins", sans-serif;
+    }
+
+    /* Form chính */
+    .register-container {
+        width: 100%;
+        max-width: 500px;
+        background: #fff;
+        border-radius: 18px;
+        padding: 45px 50px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        animation: fadeInUp 0.6s ease;
+        position: relative;
+    }
+
+    .register-container::before {
+        content: "";
+        position: absolute;
+        top: -5px;
+        left: -5px;
+        right: -5px;
+        bottom: -5px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, #198754, #0dcaf0);
+        z-index: -1;
+        opacity: 0.4;
+        filter: blur(10px);
+    }
+
+    .register-container h2 {
+        text-align: center;
+        color: #198754;
+        margin-bottom: 25px;
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
+
+    .mb-3 {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+        margin-bottom: 18px;
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 6px;
+        width: 100%;
+        text-align: left;
+    }
+
+    /* ✅ Textbox full chiều rộng, giống login */
+    .register-container input.form-control,
+    .register-container input[type="text"],
+    .register-container input[type="password"],
+    .register-container input[type="email"] {
+        width: 100% !important;
+        border-radius: 12px;
+        padding: 14px 16px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+    }
+
+    .register-container input:focus {
+        border-color: #198754;
+        box-shadow: 0 0 8px rgba(25, 135, 84, 0.3);
+        outline: none;
+    }
+
+    /* Nút đăng ký */
+    .register-container .btn-success {
+        width: 100%;
+        border-radius: 12px;
+        padding: 14px;
+        font-size: 16px;
+        font-weight: 600;
+        background: linear-gradient(135deg, #198754, #16a34a);
+        border: none;
+        transition: all 0.3s ease;
+        margin-top: 5px;
+    }
+
+    .register-container .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(25, 135, 84, 0.25);
+    }
+
+    /* Thông báo */
+    .register-container .alert {
+        border-radius: 10px;
+        font-size: 14px;
+        padding: 10px 14px;
+        margin-bottom: 15px;
+    }
+
+    /* Link dưới cùng */
+    .register-container p {
+        text-align: center;
+        margin-top: 18px;
+        font-size: 15px;
+        color: #444;
+    }
+
+    .register-container a {
+        color: #0d6efd;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .register-container a:hover {
+        text-decoration: underline;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            transform: translateY(30px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+</style>
+
+<div class="register-wrapper">
+    <div class="register-container">
+        <h2>Đăng ký tài khoản</h2>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        {% if form.errors %}
+            <div class="alert alert-danger">
+                <strong>Lỗi:</strong> Vui lòng kiểm tra lại thông tin.
+            </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="id_username" class="form-label">Tên đăng nhập</label>
+                {{ form.username }}
+            </div>
+
+            <div class="mb-3">
+                <label for="id_password1" class="form-label">Mật khẩu</label>
+                {{ form.password1 }}
+            </div>
+
+            <div class="mb-3">
+                <label for="id_password2" class="form-label">Xác nhận mật khẩu</label>
+                {{ form.password2 }}
+            </div>
+
+            <div class="mb-3">
+                <label for="id_email" class="form-label">Email</label>
+                <input type="email" name="email" id="id_email" class="form-control" required placeholder="Nhập email của bạn">
+            </div>
+
+            <button type="submit" class="btn btn-success">Đăng ký</button>
+        </form>
+
+        <p>Đã có tài khoản? <a href="{% url 'login' %}">Đăng nhập ngay</a></p>
+    </div>
+</div>
+{% endblock register_content %}

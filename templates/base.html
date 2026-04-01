@@ -1,0 +1,358 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Sales Web{% endblock %}</title>
+
+  <!-- Google Font + Bootstrap -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+<style>
+/* ===== RESET & BASE ===== */
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: #f5f7fb;
+  color: #333;
+  margin: 0;
+  display: flex;
+  min-height: 100vh;
+  overflow-x: hidden;
+  padding-top: 70px;
+}
+
+/* ===== NAVBAR ===== */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background: linear-gradient(180deg, #14213d, #1e2a47);
+  color: white;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  overflow: visible;
+}
+
+/* ===== LOGO ===== */
+.navbar-brand {
+  position: relative;      /* ✅ MỐC */
+  min-width: 160px;        /* 🔥 FIX QUAN TRỌNG: landing không còn mất logo */
+  height: 70px;
+}
+
+.navbar-brand img,
+.logo-img {
+  position: absolute;
+
+  /* 🔽 THỤT XUỐNG MỘT CHÚT */
+  top: -30px;
+
+  /* ➡️ CĂN SANG PHẢI MỘT CHÚT */
+  left: 28px;
+
+  /* 🔥 TO THÊM MỘT CHÚT */
+  height: 135px;
+
+  width: auto;
+  max-height: none;
+  z-index: 2100;
+}
+/* ===== MENU TOGGLE ===== */
+.menu-toggle {
+  font-size: 26px;
+  color: white;
+  background: none;
+  border: none;
+  display: none;
+}
+
+/* ===== NAV LINKS ===== */
+.navbar-nav .nav-link {
+  color: #fff !important;
+  font-weight: 500;
+  margin-right: 20px;
+  transition: color 0.3s, transform 0.2s;
+}
+
+.navbar-nav .nav-link:hover {
+  color: #ffc107 !important;
+  transform: translateY(-2px);
+}
+
+.navbar-nav .btn {
+  border-radius: 20px;
+  font-weight: 500;
+  padding: 6px 14px;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  width: 230px;
+  background: linear-gradient(180deg, #14213d, #1e2a47);
+  color: #fff;
+  position: fixed;
+  top: 70px;
+  left: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 3px 0 15px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease;
+}
+
+/* LIST GROUP */
+.sidebar .list-group {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  height: 100%;
+  padding: 12px 8px;
+}
+
+/* MENU ITEM */
+.sidebar .list-group-item {
+  background: transparent;
+  color: #d8dae3;
+  border: none;
+  font-weight: 500;
+  font-size: 15px;
+  border-radius: 10px;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+}
+
+.sidebar .list-group-item:hover {
+  background-color: rgba(255,255,255,0.15);
+  transform: translateX(6px);
+}
+
+.sidebar .list-group-item.active {
+  background: linear-gradient(90deg, #1f3b73, #14213d);
+  color: #fff !important;
+  font-weight: 600;
+  transform: translateX(6px);
+  box-shadow: inset 3px 0 0 #ffc107;
+}
+
+/* ===== MAIN CONTENT ===== */
+.main-content {
+  flex: 1;
+  margin-left: 230px;
+  padding: 100px 50px 50px;
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== AUTH FIX ===== */
+{% if not user.is_authenticated %}
+body {
+  display: flex !important;     /* 🔥 giữ flex → không mất mốc */
+  flex-direction: column;
+}
+
+.main-content {
+  margin-left: 0 !important;
+  padding-top: 100px;
+}
+{% endif %}
+
+/* =======================
+   RESPONSIVE
+   ======================= */
+@media (max-width: 992px) {
+
+  .navbar {
+    padding: 0 12px;
+  }
+
+  .navbar-brand {
+    min-width: auto;
+    height: auto;
+  }
+
+  .navbar-brand img,
+  .logo-img {
+    position: static;
+    height: 48px;
+  }
+
+  .menu-toggle {
+    display: block;
+    font-size: 24px;
+  }
+
+  .sidebar {
+    transform: translateX(-100%);
+    width: 220px;
+    z-index: 1200;
+  }
+
+  .sidebar.sidebar-open {
+    transform: translateX(0);
+  }
+
+  .main-content {
+    margin-left: 0;
+    padding: 90px 20px 40px;
+  }
+}
+
+@media (max-width: 576px) {
+
+  body {
+    padding-top: 64px;
+  }
+
+  .navbar {
+    height: 64px;
+  }
+
+  .navbar-nav .nav-link {
+    display: none;
+  }
+
+  .navbar-nav .btn {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+
+  .menu-toggle {
+    font-size: 22px;
+  }
+
+  .main-content {
+    padding: 80px 12px 24px;
+  }
+}
+
+
+
+
+@media (max-width: 992px) {
+
+  /* 🔥 GỠ DÀN ĐỀU CHIỀU CAO */
+  .sidebar .list-group {
+    height: auto !important;
+    justify-content: flex-start !important;
+  }
+
+  .sidebar .list-group-item {
+    font-size: 14px;
+    padding: 10px 14px;
+    margin-bottom: 6px;
+  }
+
+  .sidebar .list-group-item i {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 576px) {
+
+  .sidebar .list-group-item {
+    font-size: 13px;
+    padding: 8px 12px;
+    margin-bottom: 4px;
+  }
+
+  .sidebar .list-group-item i {
+    font-size: 15px;
+  }
+}
+</style>
+</head>
+
+
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar px-4">
+    <div class="d-flex align-items-center">
+      <button class="menu-toggle me-3" id="menu-toggle">☰</button>
+      <a class="navbar-brand d-flex align-items-center" href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'landing' %}{% endif %}">
+        <img src="{% static 'images/LOGO_WEB.png' %}" alt="Logo">
+      </a>
+    </div>
+
+    <ul class="navbar-nav d-flex flex-row align-items-center gap-2 ms-auto">
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'store_product_list' %}">
+          🛒 Cửa hàng
+        </a>
+      </li>
+      {% if user.is_authenticated %}
+        <li class="nav-item"><a class="nav-link" href="#">👤 {{ user.username }}</a></li>
+        <li class="nav-item"><a class="btn btn-sm btn-outline-primary" href="{% url 'logout' %}">Đăng xuất</a></li>
+      {% else %}
+        <li class="nav-item"><a class="btn btn-sm btn-outline-light" href="{% url 'login' %}">Đăng nhập</a></li>
+        <li class="nav-item"><a class="btn btn-sm btn-warning text-dark" href="{% url 'register' %}">Đăng ký</a></li>
+      {% endif %}
+    </ul>
+  </nav>
+
+  {% if user.is_authenticated %}
+    <!-- SIDEBAR -->
+    <div class="sidebar" id="sidebar">
+      <div class="list-group list-group-flush">
+
+        <a href="{% url 'dashboard' %}" class="list-group-item {% if request.path == '/' %}active{% endif %}">
+          <i class="bi bi-house-fill me-2"></i> Trang chủ
+        </a>
+
+        <a href="{% url 'product_list' %}" class="list-group-item {% if '/products' in request.path %}active{% endif %}">
+          <i class="bi bi-box-seam me-2"></i> Sản phẩm
+        </a>
+
+        <a href="{% url 'order_list' %}" class="list-group-item {% if '/orders' in request.path %}active{% endif %}">
+          <i class="bi bi-receipt-cutoff me-2"></i> Đơn hàng
+        </a>
+
+        <a href="{% url 'customer_list' %}" class="list-group-item {% if '/customers' in request.path %}active{% endif %}">
+          <i class="bi bi-people-fill me-2"></i> Khách hàng
+        </a>
+
+        <a href="{% url 'inventory_list' %}" class="list-group-item {% if '/inventory' in request.path %}active{% endif %}">
+          <i class="bi bi-building me-2"></i> Kho hàng
+        </a>
+
+        <a href="{% url 'report_home' %}" class="list-group-item {% if '/reports' in request.path %}active{% endif %}">
+          <i class="bi bi-graph-up-arrow me-2"></i> Báo cáo
+        </a>
+
+      </div>
+    </div>
+  {% endif %} 
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    {% block landing_content %}{% endblock landing_content %}
+    {% block register_content %}{% endblock register_content %}
+    {% block login_content %}{% endblock login_content %}
+    {% block dashboard_content %}{% endblock dashboard_content %}
+  </main>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Toggle sidebar on small screens
+    document.getElementById('menu-toggle').addEventListener('click', function() {
+      document.getElementById('sidebar').classList.toggle('sidebar-open');
+    });
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,305 @@
+{% extends "base.html" %}
+{% load static %}
+{% block landing_content %}
+<div class="landing-full">
+  <div class="landing-page">
+
+    <!-- HERO (full width, nội dung căn giữa) -->
+     <section class="full-bleed team-hero">
+      <div class="inner">
+        <h2 class="team-title">
+          Thành viên nhóm 14: Đàm Quang Phương, Nguyễn Văn Thuận, Bùi Hoàng Gia Khánh
+        </h2>
+      </div>
+    </section>
+    <section class="full-bleed landing-hero">
+      <div class="inner">
+        <h2 class="fw-bold mb-3 hero-title">👋 Chào mừng bạn đã đến với trang web quản lý bán hàng</h2>
+        <p class="text-muted fs-5 mb-0">Vui lòng đăng nhập hoặc đăng ký để tiếp tục.</p>
+      </div>
+    </section>
+
+    <section class="separator">
+      <div class="inner small"><hr></div>
+    </section>
+
+    <!-- INDUSTRY (full width, nền khác) -->
+    <section class="full-bleed industry-section">
+      <div class="inner">
+        <h2 class="text-center fw-bold mb-5">Đa Dạng Ngành Nghề Kinh Doanh</h2>
+
+        <div class="row align-items-center">
+          <div class="col-lg-6 text-center mb-4 mb-lg-0">
+            <img src="{% static 'images/cogaibanhang.png' %}" alt="Cô gái bán hàng" class="img-fluid rounded industry-img">
+          </div>
+
+          <div class="col-lg-6">
+            <p class="mb-4 text-muted fs-5">
+              Không ngừng cải tiến, bổ sung các tính năng phù hợp với nhiều loại hình kinh doanh như:
+            </p>
+
+            <div class="row g-4">
+              <div class="col-sm-6">
+                <ul class="list-unstyled feature-list">
+                  <li class="d-flex align-items-center mb-3"><span class="icon-circle ico-1">🛒</span><p class="mb-0 ms-3 fw-medium">Tạp hóa & Siêu thị</p></li>
+                  <li class="d-flex align-items-center mb-3"><span class="icon-circle ico-2">💄</span><p class="mb-0 ms-3 fw-medium">Mỹ phẩm</p></li>
+                  <li class="d-flex align-items-center mb-3"><span class="icon-circle ico-3">👕</span><p class="mb-0 ms-3 fw-medium">Thời trang</p></li>
+                  <li class="d-flex align-items-center mb-3"><span class="icon-circle ico-4">🏠</span><p class="mb-0 ms-3 fw-medium">Nội thất</p></li>
+                  <li class="d-flex align-items-center mb-3"><span class="icon-circle ico-5">🍽️</span><p class="mb-0 ms-3 fw-medium">Nhà hàng</p></li>
+                </ul>
+              </div>
+
+              <div class="col-sm-6">
+                <ul class="list-unstyled feature-list">
+                  <li class="d-flex align-items-center mb-3"><span class="icon-circle ico-6">☕</span><p class="mb-0 ms-3 fw-medium">Cafe & Trà sữa</p></li>
+                  <li class="d-flex align-items-center mb-3"><span class="icon-circle ico-7">👶</span><p class="mb-0 ms-3 fw-medium">Mẹ & Bé</p></li>
+                  <li class="d-flex align-items-center mb-3"><span class="icon-circle ico-8">🎂</span><p class="mb-0 ms-3 fw-medium">Tiệm bánh</p></li>
+                  <li class="d-flex align-items-center mb-3"><span class="icon-circle ico-9">📱</span><p class="mb-0 ms-3 fw-medium">Đồ công nghệ</p></li>
+                  <li class="d-flex align-items-center mb-3"><span class="icon-circle ico-10">🧸</span><p class="mb-0 ms-3 fw-medium">Đồ chơi</p></li>
+                </ul>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- INTRO TEXT (keeps centered) -->
+    <section class="full-bleed intro-section">
+      <div class="inner text-center">
+        <h1 class="fw-bolder display-4 mb-4">Quản Lý Bán Hàng <span class="accent">Hiệu Quả</span> Cho Mọi Mô Hình</h1>
+        <p class="lead text-muted">Giải pháp toàn diện giúp tối ưu hóa quy trình bán hàng, tồn kho và khách hàng của bạn.</p>
+      </div>
+    </section>
+
+    <section class="separator">
+      <div class="inner small"><hr></div>
+    </section>
+
+    <!-- APP MOCKUPS -->
+    <section class="full-bleed app-mockup-section">
+      <div class="inner">
+        <h2 class="text-center fw-bold mb-5">Giao Diện Quản Lý Trực Quan Trên Mọi Thiết Bị</h2>
+
+        <div class="row justify-content-center align-items-end">
+          <div class="col-12 col-lg-10 mb-5">
+            <div class="device-mockup laptop shadow-lg">
+              <div class="screen">
+                <img src="{% static 'images/anh1.png' %}" alt="Giao diện quản lý sản phẩm" class="img-fluid mockup-screenshot">
+              </div>
+              <div class="keyboard"></div>
+            </div>
+          </div>
+
+          <div class="col-6 col-md-4 col-lg-3 d-flex justify-content-center">
+            <div class="device-mockup phone shadow">
+              <div class="screen">
+                <img src="{% static 'images/anh3.png' %}" alt="Dashboard Mobile" class="img-fluid mockup-screenshot">
+              </div>
+            </div>
+          </div>
+
+          <div class="col-6 col-md-8 col-lg-5 d-flex justify-content-center">
+            <div class="device-mockup tablet shadow">
+              <div class="screen">
+                <img src="{% static 'images/anh2.png' %}" alt="Đơn hàng trên Tablet" class="img-fluid mockup-screenshot">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER full width -->
+    <footer class="full-bleed footer">
+      <div class="inner text-center small">Copyright By TPK Teams</div>
+    </footer>
+
+  </div>
+</div>
+<style>
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden !important;
+}
+
+/* Loại bỏ tất cả padding/margin từ wrapper của base.html */
+.main-content,
+.content,
+.container,
+.wrapper,
+.page-wrapper {
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+}
+
+/* Force landing chiếm full chiều rộng */
+.landing-full {
+    width: 100vw !important;
+    margin-left: calc(-50vw + 50%) !important;
+}
+  :root{
+    --primary-color: #14213d;
+    --accent-color: #fca311;
+    --light-bg: #f4f6f8;
+    --mockup-bg: #eef1f6;
+    --device-color: #212529;
+    --content-max: 1200px;
+    --side-gap: 5vw; /* khoảng cách 2 bên so với màn hình */
+  }
+
+  /* --- Reset / đảm bảo landing-page full width --- */
+  .landing-page {
+    width: 100%;
+    min-height: 100vh;
+    overflow-x: hidden;
+    display: block;
+    background: white;
+  }
+
+  /* full-bleed: dùng để "phá" container của base.html và chiếm full chiều ngang */
+  .full-bleed{
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+    width: 100vw;
+    box-sizing: border-box;
+  }
+
+  /* Inner container: giới hạn nội dung, căn giữa, có padding 2 bên */
+  .full-bleed .inner {
+    max-width: var(--content-max);
+    margin: 0 auto;
+    padding-left: var(--side-gap);
+    padding-right: var(--side-gap);
+    box-sizing: border-box;
+  }
+
+  /* small inner cho separator */
+  .inner.small{ max-width: 900px; padding-top: .5rem; padding-bottom: .5rem; }
+
+  /* HERO */
+  .landing-hero{
+    background: linear-gradient(180deg, #ffffff 0%, #fbfdff 60%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 55vh;      /* hợp lý hơn */
+    padding: 2rem 0;       /* nhẹ hơn */
+}
+  .hero-title{ color: var(--primary-color); font-size: clamp(1.4rem, 2.6vw, 2.4rem); }
+  .landing-hero p{ color: #6c757d; }
+
+  /* INDUSTRY */
+  .industry-section{ background-color: var(--light-bg); padding: 3.2rem 0; }
+  .industry-section h2{ color: var(--primary-color); }
+  .industry-img{ max-height: 420px; object-fit: contain; }
+
+  .feature-list li{ transition: transform .18s ease; }
+  .feature-list li:hover{ transform: translateX(6px); }
+
+  .icon-circle{
+    display:flex; align-items:center; justify-content:center;
+    width:44px; height:44px; border-radius:50%; font-size:1.1rem;
+    flex-shrink:0;
+  }
+  /* riêng màu từng icon nếu cần (giữ inline hoặc dùng lớp) */
+  .ico-1{ background:#e6f7ee; color:#198754; }
+  .ico-2{ background:#e9fbf6; color:#20c997; }
+  .ico-3{ background:#e6effd; color:#0d6efd; }
+  .ico-4{ background:#f0ebf9; color:#6f42c1; }
+  .ico-5{ background:#fde8e9; color:#dc3545; }
+  .ico-6{ background:#fff8e6; color:#ffc107; }
+  .ico-7{ background:#fff1e5; color:#fd7e14; }
+  .ico-8{ background:#f7e9f1; color:#d63384; }
+  .ico-9, .ico-10{ background:#f0f2f4; color:#6c757d; }
+
+  /* INTRO */
+  .intro-section{ padding: 3.6rem 0; background: transparent; }
+  .intro-section .accent{ color: var(--accent-color); }
+
+  /* APP MOCKUPS */
+  .app-mockup-section{ background-color: var(--mockup-bg); padding: 3.6rem 0 5rem; }
+  .app-mockup-section h2{ color: var(--primary-color); }
+
+  .device-mockup{ position: relative; margin: 12px auto; box-sizing: content-box; background-color: var(--device-color); box-shadow: 0 14px 28px rgba(0,0,0,.18); border-radius: 14px; overflow: visible; }
+  .device-mockup .screen{ position: absolute; top:0; left:0; right:0; bottom:0; overflow:hidden; background: #fff; }
+  .mockup-screenshot{ width:100%; height:100%; object-fit: contain; display:block; transition: transform .45s ease; background:#fff; }
+
+  .device-mockup.laptop{ width:100%; max-width:880px; height:500px; border-radius:12px; padding-bottom:20px; }
+  .device-mockup.laptop .screen{ top:15px; left:25px; right:25px; height: calc(100% - 40px); border-radius:6px; }
+  .device-mockup.laptop .keyboard{ position:absolute; bottom:0; left:8%; right:8%; height:24px; background:#495057; border-radius:0 0 12px 12px; transform: perspective(100px) rotateX(10deg); }
+
+  .device-mockup.phone{ width:260px; height:520px; border:8px solid var(--device-color); border-radius:35px; padding:3px; transform: rotate(3deg); margin-top:20px; }
+  .device-mockup.phone .screen{ border-radius:30px; }
+  .device-mockup.tablet{ width:500px; height:340px; border:12px solid var(--device-color); border-radius:18px; padding:3px; transform: rotate(-2deg); }
+
+  /* Footer full width */
+  .footer{
+    background-color: var(--primary-color) !important;
+    color: #fff;
+    padding: 20px 0;
+    font-weight:500;
+    text-align:center;
+  }
+  .footer::before{ content:""; display:block; height:3px; width:60px; background:var(--accent-color); margin:0 auto 10px; border-radius:2px; }
+
+  /* Separator small */
+  .separator hr{ border-top: 1px solid rgba(0,0,0,0.06); margin:0; }
+
+  /* Make sure images & svg don't overflow */
+  img{ max-width:100%; height:auto; display:block; }
+
+  /* ===== Responsive tweaks ===== */
+  @media (max-width: 1199px){
+    .device-mockup.laptop{ height:420px; }
+    .industry-img{ max-height:360px; }
+  }
+
+  @media (max-width: 991px){
+    :root{ --side-gap: 6vw; }
+    .landing-hero{ min-height: 60vh; padding: 3.2rem 0; }
+    .device-mockup.laptop{ height:340px; }
+    .device-mockup.tablet{ width:80%; height:260px; transform:none; }
+    .device-mockup.phone{ width:70%; height:400px; transform:none; }
+    .app-mockup-section .row { gap:10px; }
+  }
+
+  @media (max-width: 767px){
+    :root{ --side-gap: 6vw; --content-max: 100%; }
+    .landing-hero{ padding: 2.8rem 0; min-height: 55vh; text-align:center; }
+    .industry-img{ max-height:240px; margin-bottom:1rem; }
+    .device-mockup.laptop{ height:300px; }
+    .device-mockup.phone{ height:360px; }
+    .intro-section h1{ font-size:clamp(1.2rem,6vw,1.8rem); }
+    .full-bleed .inner{ padding-left: 6vw; padding-right: 6vw; }
+  }
+
+  /* Small accessibility / UX niceties */
+  .feature-list p{ margin:0; font-size: .98rem; color:#2e3136; }
+  .text-muted{ color:#6c757d!important; }
+
+.team-hero{
+  background: #fff;
+  padding: 0.8rem 0 0.4rem;   /* trên – dưới (giảm chiều cao) */
+  margin-top: 72px;           /* đẩy xuống tránh navbar */
+}
+
+.team-title{
+  font-size: 1.15rem;         /* nhỏ hơn chút */
+  font-weight: 600;
+  color: var(--primary-color);
+  text-align: center;
+  margin: 0;                  /* không tạo khoảng dư */
+  line-height: 1.35;
+}
+</style>
+
+{% endblock landing_content %}

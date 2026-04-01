@@ -1,0 +1,484 @@
+{% extends 'base.html' %}
+{% block title %}Tổng quan - Sales Dashboard{% endblock %}
+
+{% block dashboard_content %}
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<style>
+    /* ===== Layout tổng thể ===== */
+    .dashboard-container {
+        background-color: #f8fafc;
+        min-height: 100vh;
+        padding: 30px;
+    }
+
+    .dashboard-header {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 25px;
+        color: #1e293b;
+    }
+
+    /* ===== Card ===== */
+    .card {
+        border-radius: 15px !important;
+        border: none !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        transition: all 0.2s ease-in-out;
+    }
+
+    .card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+        background-color: #f1f5f9 !important;
+        border-bottom: none !important;
+        border-radius: 15px 15px 0 0 !important;
+        font-weight: 600;
+        color: #334155;
+    }
+
+    .card-body {
+        padding: 20px;
+    }
+
+    /* ===== Table ===== */
+    .table thead th {
+        background-color: #f8fafc;
+        color: #334155;
+        font-weight: 600;
+        border-bottom: 2px solid #e2e8f0;
+        font-size: 0.9rem;
+    }
+
+    .table td {
+        font-size: 0.9rem;
+        vertical-align: middle;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f1f5f9;
+    }
+
+    .list-group-item {
+        border: none;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 0.9rem;
+    }
+
+    /* ===== KPI Cards ===== */
+    .kpi-card h6 {
+        color: #6b7280;
+        font-size: 0.9rem;
+    }
+
+    .kpi-card h3 {
+        font-size: 1.6rem;
+    }
+
+    /* ===== Chart ===== */
+    #monthlyRevenueChart {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+
+
+    /* ===== Reviews (gọn) ===== */
+    .review-card .card-body {
+        padding: 0;
+    }
+
+    .review-card table {
+        margin-bottom: 0;
+    }
+
+    .review-card td,
+    .review-card th {
+        padding: 8px 10px;
+        font-size: 0.88rem;
+    }
+</style>
+
+<div class="dashboard-container">
+    <h2 class="dashboard-header">
+        <i class="bi bi-bar-chart-line-fill me-2 text-primary"></i>
+        Tổng quan kinh doanh
+    </h2>
+
+    <!-- KPI Cards -->
+    
+    <!-- Chart + Top Products -->
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <i class="bi bi-graph-up-arrow me-2"></i>
+                    Biểu đồ Doanh thu tháng
+                </div>
+                <div class="card-body">
+                    <canvas id="monthlyRevenueChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <i class="bi bi-award-fill me-2 text-warning"></i>
+                    Top 5 Sản phẩm bán chạy
+                </div>
+                <div class="card-body table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Tên sản phẩm</th>
+                                <th>Số lượng</th>
+                                <th>Doanh thu</th>
+                            </tr>
+                        </thead>
+                        <tbody id="topProductsBody">
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">
+                                    Đang tải...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+<div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card text-center kpi-card">
+                <div class="card-body">
+                    <h6>
+                        <i class="bi bi-cash-coin me-1 text-success"></i>
+                        Doanh thu hôm nay
+                    </h6>
+                    <h3 class="fw-bold text-success" id="revenueToday">0 đ</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-center kpi-card">
+                <div class="card-body">
+                    <h6>
+                        <i class="bi bi-bag-check-fill me-1 text-primary"></i>
+                        Số lượng đã bán
+                    </h6>
+                    <h3 class="fw-bold text-primary" id="orderCount">0</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders + Stock + Customers -->
+    <div class="row g-4 mt-4">
+        <!-- LEFT -->
+        <div class="col-lg-6">
+            <!-- Pending Orders -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-hourglass-split me-2 text-warning"></i>
+                    Đơn hàng chờ xử lý
+                </div>
+                <div class="card-body table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Mã đơn</th>
+                                <th>Khách hàng</th>
+                                <th>Ngày đặt</th>
+                                <th>Tổng tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pendingOrdersBody">
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">
+                                    Đang tải...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Reviews -->
+            <div class="card review-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>
+                        <i class="bi bi-chat-left-quote-fill me-2 text-info"></i>
+                        Đánh giá từ khách hàng
+                    </span>
+                    <a href="{% url 'reviews:admin_reviews_page' %}"
+                       class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-eye"></i> Xem tất cả
+                    </a>
+                </div>
+
+                <div class="card-body table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Khách hàng</th>
+                                <th>Sản phẩm</th>
+                                <th>Sao</th>
+                                <th>Nội dung</th>
+                                <th>Ngày</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reviewTableBody">
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">
+                                    Đang tải đánh giá...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-exclamation-triangle-fill me-2 text-danger"></i>
+                    Cảnh báo Kho hàng
+                </div>
+                <div class="card-body">
+                    <ul class="list-group" id="stockAlertList">
+                        <li class="list-group-item text-center text-muted">
+                            Đang tải...
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-people-fill me-2 text-success"></i>
+                    Khách hàng mới nhất
+                </div>
+                <div class="card-body">
+                    <ul class="list-group" id="latestCustomers">
+                        <li class="list-group-item text-center text-muted">
+                            Đang tải...
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ===== Chart.js ===== -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', async function () {
+    async function fetchJSON(url) {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`Lỗi tải dữ liệu từ ${url}`);
+        return await res.json();
+    }
+
+    try {
+        // ===== KPI Cards =====
+        if (document.getElementById('revenueToday')) {
+            const doanhThu = await fetchJSON('/api/reports/doanh-thu-hom-nay/');
+            document.getElementById('revenueToday').innerText =
+                doanhThu.doanh_thu_hom_nay.toLocaleString('vi-VN') + ' đ';
+        }
+
+        if (document.getElementById('orderCount')) {
+            const tongHang = await fetchJSON('/api/reports/tong-hang-da-ban/');
+            document.getElementById('orderCount').innerText =
+                tongHang.tong_so_luong_da_ban;
+        }
+
+        // ===== Top Products =====
+        if (document.getElementById('topProductsBody')) {
+            const topProducts = await fetchJSON('/api/reports/top_products/');
+            document.getElementById('topProductsBody').innerHTML = topProducts.length
+                ? topProducts.map((p, i) => `
+                    <tr>
+                        <td>${i + 1}</td>
+                        <td>${p.ten}</td>
+                        <td>${p.qty}</td>
+                        <td>${p.value.toLocaleString('vi-VN')} đ</td>
+                    </tr>
+                `).join('')
+                : `<tr>
+                        <td colspan="4" class="text-center text-muted">
+                            Không có dữ liệu
+                        </td>
+                   </tr>`;
+        }
+
+        // ===== Pending orders =====
+        if (document.getElementById('pendingOrdersBody')) {
+            const pending = await fetchJSON('/api/reports/pending-orders/');
+            document.getElementById('pendingOrdersBody').innerHTML = pending.length
+                ? pending.map(o => `
+                    <tr>
+                        <td>${o.id}</td>
+                        <td>${o.khach_hang}</td>
+                        <td>${new Date(o.ngay_dat).toLocaleDateString('vi-VN')}</td>
+                        <td>${o.tong_tien.toLocaleString('vi-VN')} đ</td>
+                    </tr>
+                `).join('')
+                : `<tr>
+                        <td colspan="4" class="text-center text-muted">
+                            Không có đơn chờ
+                        </td>
+                   </tr>`;
+        }
+
+        // ===== Stock alerts =====
+        if (document.getElementById('stockAlertList')) {
+            const alerts = await fetchJSON('/api/reports/stock-alerts/');
+            document.getElementById('stockAlertList').innerHTML = alerts.length
+                ? alerts.map(a => `
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        ${a.ten_san_pham}
+                        <span class="badge bg-danger">
+                            Còn ${a.so_luong_ton} / Cảnh báo ${a.muc_canh_bao}
+                        </span>
+                    </li>
+                `).join('')
+                : `<li class="list-group-item text-center text-muted">
+                        Kho ổn định
+                   </li>`;
+        }
+
+        // ===== Latest customers =====
+        if (document.getElementById('latestCustomers')) {
+            const customers = await fetchJSON('/api/reports/latest-customers/');
+            document.getElementById('latestCustomers').innerHTML = customers.length
+                ? customers.map(c => `
+                    <li class="list-group-item">
+                        ${c.ten}
+                        <small class="text-muted">
+                            (${c.sdt}) – ${new Date(c.ngay_tao).toLocaleDateString('vi-VN')}
+                        </small>
+                    </li>
+                `).join('')
+                : `<li class="list-group-item text-center text-muted">
+                        Không có khách hàng mới
+                   </li>`;
+        }
+
+        // ===== Reviews (CHỈ HIỂN THỊ 5) =====
+        if (document.getElementById('reviewTableBody')) {
+            try {
+                const reviews = await fetchJSON('/reviews/api/admin/preview/');
+                const limitedReviews = reviews.slice(0, 5);
+
+                document.getElementById('reviewTableBody').innerHTML = limitedReviews.length
+                    ? limitedReviews.map(r => `
+                        <tr>
+                            <td>${r.khach_hang}</td>
+                            <td>${r.san_pham}</td>
+                            <td style="color:#facc15;font-weight:600">
+                                ${r.so_sao} ⭐
+                            </td>
+                            <td title="${r.noi_dung}">
+                                ${r.noi_dung.length > 80
+                                    ? r.noi_dung.slice(0, 80) + '…'
+                                    : r.noi_dung}
+                            </td>
+                            <td>${new Date(r.ngay_tao).toLocaleDateString('vi-VN')}</td>
+                        </tr>
+                    `).join('')
+                    : `<tr>
+                            <td colspan="5" class="text-center text-muted">
+                                Chưa có đánh giá nào
+                            </td>
+                    </tr>`;
+            } catch (err) {
+                console.warn('Không tải được đánh giá:', err);
+                document.getElementById('reviewTableBody').innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">
+                            Không thể tải đánh giá
+                        </td>
+                    </tr>`;
+            }
+        }
+
+        // ===== Revenue Chart =====
+        if (document.getElementById('monthlyRevenueChart')) {
+            const data = await fetchJSON('/api/reports/daily-revenue/');
+            const labels = data.map(item => item.label);
+            const values = data.map(item => item.value);
+
+            const ctx = document.getElementById('monthlyRevenueChart').getContext('2d');
+            if (window.monthlyChart) window.monthlyChart.destroy();
+
+            window.monthlyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Doanh thu (đ)',
+                        data: values,
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        tension: 0.3,
+                        fill: true,
+                        borderWidth: 2,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#2563eb'
+                    }]
+                },
+                options: {
+    responsive: true,
+    maintainAspectRatio: false,   // 🔥 làm chart giãn đầy card
+    layout: {
+        padding: 0
+    },
+    scales: {
+        y: {
+            beginAtZero: true,
+            grace: '5%',  // 🔥 giảm khoảng trống trên đỉnh
+            ticks: {
+                callback: value =>
+                    value.toLocaleString('vi-VN') + ' đ'
+            }
+        },
+        x: {
+            ticks: {
+                autoSkip: true,
+                maxRotation: 0
+            }
+        }
+    },
+    plugins: {
+        legend: { display: false },
+        tooltip: {
+            callbacks: {
+                label: ctx =>
+                    ctx.parsed.y.toLocaleString('vi-VN') + ' đ'
+            }
+        }
+    }
+}
+
+            });
+        }
+
+    } catch (err) {
+        console.error('Lỗi khi tải dashboard:', err);
+    }
+});
+{{ block.super }}
+</script>
+
+{% endblock dashboard_content %}
